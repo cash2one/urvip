@@ -1,4 +1,24 @@
-var sendApiRequest = function(url, parameters, callback) {
+function isValidInteger(rawValue) {
+    return /^-?[0-9]*$/.test(rawValue);
+}
+
+function isValidFloat(rawValue) {
+    return /^-?[0-9]*(\.[0-9]+)?$/.test(rawValue);
+}
+
+function isValidCard(rawValue) {
+    return /^-?[0-9a-zA-Z]+?$/.test(rawValue);
+}
+
+function isValidIdentification(rawValue) {
+    return /^[0-9]{17}[0-9X]$/.test(rawValue);
+}
+
+function isValidCellphone(rawValue) {
+    return /^[0-9]{11}?$/.test(rawValue);
+}
+
+function sendApiRequest(url, parameters, callback) {
     var body = "";
     for (var key in parameters) {
         body = body + key + "=" + encodeURIComponent(parameters[key]) + "&";

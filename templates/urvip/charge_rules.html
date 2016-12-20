@@ -165,8 +165,24 @@
         var balanceChange = editBalanceChangeElement.value;
         var quantityChange = editQuantityChangeElement.value;
         var scoreChange = editScoreChangeElement.value;
-        if (!name || !payout || (!balanceChange && !quantityChange && !scoreChange)) {
-            alert("信息不完整，请补全");
+        if (!name) {
+            alert("请填写规则名称");
+            return false;
+        }
+        if (!payout) {
+            alert("请填写支付金额");
+            return false;
+        }
+        if (!isValidFloat(payout)) {
+            alert("支付金额不正确");
+            return false;
+        }
+        if (!balanceChange && !quantityChange && !scoreChange) {
+            alert("请填写得到金额/次数/积分");
+            return false;
+        }
+        if (!isValidFloat(balanceChange) || !isValidInteger(quantityChange) || !isValidInteger(scoreChange)) {
+            alert("得到金额/次数/积分不正确");
             return false;
         }
         sendApiRequest("/addChargeRule",

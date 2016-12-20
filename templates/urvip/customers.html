@@ -317,16 +317,24 @@
         customer['gender'] = editGenderElement.options[editGenderElement.selectedIndex].value;
         customer['identification'] = editIdentificationElement.value;
         customer['cellphone'] = editCellphoneElement.value;
-        if (!customer['name'] || !customer['gender'] || !customer['identification'] && customer['cellphone']) {
-            alert("信息不完整，请补全");
+        if (!customer['name']) {
+            alert("请填写姓名");
             return false;
         }
-        if (!/^\d{15}$|^\d{17}[0-9Xx]{1}$/.test(customer['identification'])) {
-            alert("请输入正确的身份证");
+        if (!customer['gender']) {
+            alert("请填写性别");
             return false;
         }
-        if (!/^1[34578]\d{9}$/.test(customer['cellphone'])) {
-            alert("请输入正确的手机号码");
+        if (!customer['cellphone']) {
+            alert("请填写手机号");
+            return false;
+        }
+        if (!isValidCellphone(customer['cellphone'])) {
+            alert("手机号格式不正确");
+            return false;
+        }
+        if (customer['identification'] && !isValidIdentification(customer['identification'])) {
+            alert("身份证格式不正确");
             return false;
         }
         sendApiRequest("/addCustomer",
@@ -343,6 +351,10 @@
      */
     qrcode.callback = function(data) {
         hideModal();
+        if (!isValidCard(data)) {
+            alert("识别二维码失败");
+            return false;
+        }
         window.location.href = "/customers?card=" + data;
     };
     document.getElementById("qr-input").addEventListener("change", function() {
@@ -377,8 +389,8 @@
     };
     confirmSearchElem.addEventListener("click", function(event) {
         event.preventDefault();
-        if (!/^1[34578]\d{9}$/.test(searchCellphoneElem.value)) {
-            alert("请输入正确的手机号码");
+        if (!isValidCellphone(searchCellphoneElem.value)) {
+            alert("手机号不正确");
             return false;
         }
         hideModal();
@@ -410,7 +422,7 @@
         var chargeRuleId = chargeRuleElement.options[chargeRuleElement.selectedIndex].value;
         var comments = chargeCommentsElement.value;
         if (!chargeRuleId) {
-            alert("信息不完整，请补全");
+            alert("请选择充值规则");
             return false;
         }
         sendApiRequest("/charge",
@@ -455,9 +467,33 @@
     function confirmConsume() {
         var customerId = customer['id'];
         var updateTime = customer['updateTime'];
+        if (!isValidFloat(consumeBalanceElement.value)) {
+            alert("消费金额不正确");
+            return false;
+        }
+        if (!isValidInteger(consumeQuantityElement.value)) {
+            alert("消费次数不正确);
+            return false;
+        }
+        if (!isValidInteger(consumeScoreElement.value)) {
+            alert("消费积分不正确");
+            return false;
+        }
         var balanceChange = -parseFloat(consumeBalanceElement.value);
         var quantityChange = -parseInt(consumeQuantityElement.value);
         var scoreChange = -parseInt(consumeScoreElement.value);
+        if (-balanceChange > customer['balance']) {
+            alert("消费金额不正确");
+            return false;
+        }
+        if (-quantityChange > customer['quantity']) {
+            alert("消费次数不正确");
+            return false;
+        }
+        if (-scoreChange > customer['score']) {
+            alert("消费积分不正确");
+            return false;
+        }
         var comments = consumeCommentsElement.value;
         sendApiRequest("/consume",
                        {

@@ -29,7 +29,7 @@ class Seller(BaseModel):
     updateTime = Column('update_time', DateTime)
 
     @staticmethod
-    def add(db, name, we_chat_account, score_rate=1.0):
+    def add(db, name, we_chat_account, score_rate=0):
         """添加商户
         """
         now = datetime.now()
