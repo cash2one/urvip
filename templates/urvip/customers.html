@@ -63,7 +63,7 @@
                         {% set vo = {'id': customer.id, 'updateTime': customer.updateTime.timestamp(), 'identification': customer.identification, 'cellphone': customer.cellphone, 'name': customer.name, 'gender': customer.gender, 'balance': customer.balance, 'quantity': customer.quantity, 'score': customer.score} %}
                         <a href="javascript:;"  class="a-in-table" onclick="showCharge({{ vo }});">充值</a>
                         <a href="javascript:;"  class="a-in-table" onclick="showConsume({{ vo }});">消费</a>
-                        <a href="/customerDetail?id={{ customer.id }}" class="a-in-table" >明细</a>
+                        <a href="/customerDetail?id={{ customer.id }}" class="a-in-table" target="_blank">明细</a>
                         <a href="javascript:;"  class="a-in-table" onclick="showDelete({{ vo }});">删除</a>
                     </td>
                 </tr>
@@ -318,23 +318,23 @@
         customer["identification"] = editIdentificationElement.value;
         customer["cellphone"] = editCellphoneElement.value;
         if (!customer["name"]) {
-            alert("请填写姓名");
+            window.alert("请填写姓名");
             return false;
         }
         if (!customer["gender"]) {
-            alert("请填写性别");
+            window.alert("请填写性别");
             return false;
         }
         if (!customer["cellphone"]) {
-            alert("请填写手机号");
+            window.alert("请填写手机号");
             return false;
         }
         if (!isValidCellphone(customer["cellphone"])) {
-            alert("手机号格式不正确");
+            window.alert("手机号格式不正确");
             return false;
         }
         if (customer["identification"] && !isValidIdentification(customer["identification"])) {
-            alert("身份证格式不正确");
+            window.alert("身份证格式不正确");
             return false;
         }
         if (!customer["cellphone"].startsWith("+")) {
@@ -355,7 +355,7 @@
     qrcode.callback = function(data) {
         hideModal();
         if (!isValidCard(data)) {
-            alert("识别二维码失败");
+            window.alert("识别二维码失败");
             return false;
         }
         window.location.href = "/customers?card=" + data;
@@ -394,7 +394,7 @@
         event.preventDefault();
         var cellphone = searchCellphoneElem.value;
         if (!isValidCellphone(cellphone)) {
-            alert("手机号不正确");
+            window.alert("手机号不正确");
             return false;
         }
         if (!cellphone.startsWith("+")) {
@@ -428,7 +428,7 @@
         var chargeRuleId = chargeRuleElement.options[chargeRuleElement.selectedIndex].value;
         var comments = chargeCommentsElement.value;
         if (!chargeRuleId) {
-            alert("请选择充值规则");
+            window.alert("请选择充值规则");
             return false;
         }
         sendApiRequest("/charge",
@@ -477,30 +477,34 @@
         var consumeScore = consumeScoreElement.value ? consumeScoreElement.value : "0";
         var updateTime = customer["updateTime"];
         if (!isValidFloat(consumeBalance)) {
-            alert("消费金额不正确");
+            window.alert("消费金额不正确");
             return false;
         }
         if (!isValidInteger(consumeQuantity)) {
-            alert("消费次数不正确");
+            window.alert("消费次数不正确");
             return false;
         }
         if (!isValidInteger(consumeScore)) {
-            alert("消费积分不正确");
+            window.alert("消费积分不正确");
             return false;
         }
         var balanceChange = -parseFloat(consumeBalance);
         var quantityChange = -parseInt(consumeQuantity);
         var scoreChange = -parseInt(consumeScore);
-        if (-balanceChange > customer['balance']) {
-            alert("消费金额不正确");
+        if (balanceChange > 0 || -balanceChange > customer['balance']) {
+            window.alert("消费金额不正确");
             return false;
         }
-        if (-quantityChange > customer['quantity']) {
-            alert("消费次数不正确");
+        if (quantityChange > 0 || -quantityChange > customer['quantity']) {
+            window.alert("消费次数不正确");
             return false;
         }
-        if (-scoreChange > customer['score']) {
-            alert("消费积分不正确");
+        if (scoreChange > 0 || -scoreChange > customer['score']) {
+            window.alert("消费积分不正确");
+            return false;
+        }
+        if (balanceChange == 0 && quantityChange == 0 && scoreChange == 0) {
+            window.alert("请输入消费金额/次数/积分");
             return false;
         }
         var comments = consumeCommentsElement.value;

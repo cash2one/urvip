@@ -60,7 +60,7 @@ window.onload = function() {
         }
         var cellphone = cellphoneElem.value;
         if (!isValidCellphone(cellphone)) {
-            alert("请输入正确的手机号");
+            window.alert("请输入正确的手机号");
             return false;
         }
         if (!cellphone.startsWith("+")) {
