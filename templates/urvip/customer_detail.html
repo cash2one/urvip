@@ -9,137 +9,122 @@
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
 </head>
 <body>
-    <div class="container-fluid container">
-        <div class="user-info">
-            <div id="qrcode"></div>
-            <div id="qrcode-lg"></div>
-            <div class="text-line"><label>姓名</label><span>{{ customer.name }}</span>
-                <span id="qrcode"></span>
-                <span id="qrcode-lg"></span>
-            </div>
-            <div class="text-line"><label>性别</label><span>{{ {"1": "男", "2": "女"}[str(customer.gender)] }}</span></div>
-            <div class="text-line"><label>身份证号</label><span>{{ customer.identification }}</span></div>
-            <div class="text-line"><label>手机号</label><span>{{ customer.cellphone }}</span>
-                <a href="downloadCustomerDetail?id={{ customer.id }}" class="btn btn-primary btn-sm pull-right">下载</a>
-            </div>
-        </div>
 
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                    <th>时间</th>
-                    <th>类别</th>
-                    <th>余额变动</th>
-                    <th>次数变动</th>
-                    <th>积分变动</th>
-                    <th>剩余金额</th>
-                    <th>剩余次数</th>
-                    <th>剩余积分</th>
-                    <th>备注</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for i in range(len(transactions)) %}
-                {% set transaction = transactions[i] %}
-                <tr>
-                    <td>{{ datetime.strftime(transaction.createTime, '%Y-%m-%d %H:%M') }}</td>
-                    <td>{{ {'1': '充值', '5': '消费'}[str(transaction.kind)] }}</td>
-                    <td>
-                        {% if transaction.balanceChange > 0 %}
-                            <font color="#00aa00">+{{ transaction.balanceChange }}</font>
-                        {% elif transaction.balanceChange < 0 %}
-                            <font color="#d50000">{{ transaction.balanceChange }}</font>
-                        {% else %}
-                            &nbsp;
-                        {% end %}
-                    </td>
-                    <td>
-                        {% if transaction.quantityChange > 0 %}
-                            <font color="#00aa00">+{{ transaction.quantityChange }}</font>
-                        {% elif transaction.quantityChange < 0 %}
-                            <font color="#d50000">{{ transaction.quantityChange }}</font>
-                        {% else %}
-                            &nbsp;
-                        {% end %}
-                    </td>
-                    <td>
-                        {% if transaction.scoreChange > 0 %}
-                            <font color="#00aa00">+{{ transaction.scoreChange }}</font>
-                        {% elif transaction.scoreChange < 0 %}
-                            <font color="#d50000">{{ transaction.scoreChange }}</font>
-                        {% else %}
-                            &nbsp;
-                        {% end %}
-                    </td>
-                    <td>{{ transaction.balance }}</td>
-                    <td>{{ transaction.quantity }}</td>
-                    <td>{{ transaction.score }}</td>
-                    <td>{{ transaction.comments }}&nbsp;</td>
-                </tr>
-                {% end %}   
-                </tbody>
-            </table>
-        </div>  
+<div class="container-fluid container">
+    <div class="user-info">
+        <div id="qrcode"></div>
+        <div id="qrcode-lg"></div>
+        <div class="text-line"><label>姓名</label><span>{{ customer.name }}</span></div>
+        <div class="text-line"><label>性别</label><span>{{ {"1": "男", "2": "女"}[str(customer.gender)] }}</span></div>
+        <div class="text-line"><label>身份证号</label><span>{{ customer.identification }}</span></div>
+        <div class="text-line"><label>手机号</label><span>{{ customer.cellphone }}</span>
+            <a href="downloadCustomerDetail?id={{ customer.id }}" class="btn btn-primary btn-sm pull-right">下载</a>
+        </div>
     </div>
 
-    <script type="text/javascript" src="/static/script/qrcode.min.js"></script>
-    <script type="text/javascript">
-    window.onload = function(){
-        var card = "{{customer.card}}",
-            eQrcode = document.getElementById("qrcode"),
-            eQrcodeLg = document.getElementById("qrcode-lg"),
-            qrcode,
-            qrcodelg;
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                <th>时间</th>
+                <th>类别</th>
+                <th>余额变动</th>
+                <th>次数变动</th>
+                <th>积分变动</th>
+                <th>剩余金额</th>
+                <th>剩余次数</th>
+                <th>剩余积分</th>
+                <th>备注</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for i in range(len(transactions)) %}
+            {% set transaction = transactions[i] %}
+            <tr>
+                <td>{{ datetime.strftime(transaction.createTime, '%Y-%m-%d %H:%M') }}</td>
+                <td>{{ {'1': '充值', '5': '消费'}[str(transaction.kind)] }}</td>
+                <td>
+                    {% if transaction.balanceChange > 0 %}
+                        <font color="#00aa00">+{{ transaction.balanceChange }}</font>
+                    {% elif transaction.balanceChange < 0 %}
+                        <font color="#d50000">{{ transaction.balanceChange }}</font>
+                    {% else %}
+                        &nbsp;
+                    {% end %}
+                </td>
+                <td>
+                    {% if transaction.quantityChange > 0 %}
+                        <font color="#00aa00">+{{ transaction.quantityChange }}</font>
+                    {% elif transaction.quantityChange < 0 %}
+                        <font color="#d50000">{{ transaction.quantityChange }}</font>
+                    {% else %}
+                        &nbsp;
+                    {% end %}
+                </td>
+                <td>
+                    {% if transaction.scoreChange > 0 %}
+                        <font color="#00aa00">+{{ transaction.scoreChange }}</font>
+                    {% elif transaction.scoreChange < 0 %}
+                        <font color="#d50000">{{ transaction.scoreChange }}</font>
+                    {% else %}
+                        &nbsp;
+                    {% end %}
+                </td>
+                <td>{{ transaction.balance }}</td>
+                <td>{{ transaction.quantity }}</td>
+                <td>{{ transaction.score }}</td>
+                <td>{{ transaction.comments }}&nbsp;</td>
+            </tr>
+            {% end %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
-        qrcode = new QRCode(eQrcode, {
-            text: card,
-            width: 80,
-            height: 80,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
-        qrcodelg = new QRCode(eQrcodeLg, {
-            text: card,
-            width: 128,
-            height: 128,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
-
-        //放大二维码
-        if ((navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i))) {
-                //mobile
-                console.log("mobile");
-                eQrcode.addEventListener("touchstart",function(){
-                    console.log("click");
-                    eQrcodeLg.style.display = "block";
-                },true);
-
-                eQrcodeLg.addEventListener("touchstart",function(){
-                    eQrcodeLg.style.display = "none";
-                },true)
-                
-        }
-        else {
-                //PC
-                console.log("pc")
-                eQrcode.addEventListener("click",function(){
-                    console.log("click");
-                    eQrcodeLg.style.display = "block";
-                },true);
-
-                eQrcodeLg.addEventListener("click",function(){
-                    console.log("click");
-                    eQrcodeLg.style.display = "none";
-                },true)
-        }
+<script type="text/javascript" src="/static/script/davidshimjs.qrcodejs.js"></script>
+<script type="text/javascript">
+window.onload = function(){
+    var card = "{{customer.card}}",
+        eQrcode = document.getElementById("qrcode"),
+        eQrcodeLg = document.getElementById("qrcode-lg"),
+        qrcode = new QRCode(eQrcode,
+                            {
+                                text: card,
+                                width: 80,
+                                height: 80,
+                                colorDark : "#000000",
+                                colorLight : "#ffffff",
+                                correctLevel : QRCode.CorrectLevel.H
+                            }),
+        qrcodelg = new QRCode(eQrcodeLg,
+                              {
+                                  text: card,
+                                  width: 140,
+                                  height: 140,
+                                  colorDark : "#000000",
+                                  colorLight : "#ffffff",
+                                  correctLevel : QRCode.CorrectLevel.H
+                              });
+    //放大二维码
+    if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)) {
+        //mobile
+        eQrcode.addEventListener("touchstart", function() {
+            eQrcodeLg.style.display = "block";
+        }, true);
+        eQrcodeLg.addEventListener("touchstart", function() {
+            eQrcodeLg.style.display = "none";
+        }, true);
+    } else {
+        //PC
+        eQrcode.addEventListener("click", function() {
+            eQrcodeLg.style.display = "block";
+        },true);
+        eQrcodeLg.addEventListener("click", function() {
+            eQrcodeLg.style.display = "none";
+        },true)
     }
-        
+}
+</script>
 
-
-    </script>
 </body>
 </html>

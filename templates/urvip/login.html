@@ -31,18 +31,16 @@ window.onload = function() {
     var cellphoneElem = document.getElementById("cellphone"),
         captchaElem = document.getElementById("captcha"),
         loginElem = document.getElementById("login"),
-        resendCaptchaElem = document.getElementById("resendCaptcha");
-
-    var loginValid = function(){
-        if(/^1[34578]\d{9}$/.test(cellphoneElem.value) && /^\d{6}$/.test(captchaElem.value)){
-            loginElem.disabled = false;
-        }else{
-            loginElem.disabled = true;
-        }
-    };
+        resendCaptchaElem = document.getElementById("resendCaptcha"),
+        loginValid = function() {
+            if (/^1[34578]\d{9}$/.test(cellphoneElem.value) && /^\d{6}$/.test(captchaElem.value)) {
+                loginElem.disabled = false;
+            } else {
+                loginElem.disabled = true;
+            }
+        };
     cellphoneElem.addEventListener("input", loginValid);
     captchaElem.addEventListener("input", loginValid);
-
     var countDown = function(seconds) {
         var count = setInterval(function() {
             if (seconds == 0) {
@@ -54,23 +52,23 @@ window.onload = function() {
                 resendCaptchaElem.disabled = true;
                 seconds -= 1;
             }
-        },1000)
+        }, 1000);
     }
     var resendCaptchaFoo = function() {
         if (resendCaptchaElem.disabled) {
             return false;
         }
         var cellphone = cellphoneElem.value;
-        if (!(/^1[34578]\d{9}$/.test(cellphone))) {
+        if (!/^1[34578]\d{9}$/.test(cellphone)) {
             alert("请输入正确的手机号");
             return false;
         }
-        console.log("send");
         countDown(60);
         sendApiRequest("/sendCaptcha", {"cellphone": cellphone}, function(result) {});
     }
-    resendCaptchaElem.addEventListener("click",resendCaptchaFoo);
+    resendCaptchaElem.addEventListener("click", resendCaptchaFoo);
 }
 </script>
+
 </body>
 </html>

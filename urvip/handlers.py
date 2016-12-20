@@ -75,7 +75,13 @@ class CustomersHandler(PageHandler):
     @require_login
     def get(self, *args, **kwargs):
         page_num = self.get_int_argument('page')
-        customers, page_num, page_count = Customer.list_by_page(self.db, self.current_user.id, page_num)
+        card = self.get_str_argument('card')
+        cellphone = '+86{0}'.format(self.get_str_argument('cellphone'))
+        if not card and not cellphone:
+            customers, page_num, page_count = Customer.list_by_page(self.db, self.current_user.id, page_num)
+        else:
+            customer = Customer.get(self.db, self.current_user.sellerId, id=id, card=card, cellphone=cellphone)
+            customers, page_num, page_count = [customer], 0, 1
         charge_rules = ChargeRule.list(self.db, self.current_user.sellerId)
         return self.render('urvip/customers.html',
                            user_name=self.current_user.cellphone,
@@ -172,23 +178,6 @@ class DownloadCustomerDetailHandler(PageHandler):
         return self.finish()
 
 
-class CustomerQrCodeHandler(PageHandler):
-    @require_login
-    def get(self, *args, **kwargs):
-        id = self.get_int_argument('id')
-        customer = Customer.get(self.db, self.current_user.sellerId, id=id)
-        qr_code = pyqrcode.create(customer.card).text()
-        self.write('<html><table>')
-        for row in qr_code.split('\n'):
-            self.write('<tr>')
-            for col in row:
-                self.write('<td width="10" height="10" bgcolor="{0}">&nbsp;</td>'
-                           .format('#000000' if col == '1' else '#ffffff'))
-            self.write('</tr>')
-        self.write('</table></html>')
-        return self.finish()
-
-
 __handlers__ = [
     (r'^/login$', LoginHandler),
     (r'^/sendCaptcha$', SendCaptchaHandler),
@@ -201,6 +190,5 @@ __handlers__ = [
     (r'^/charge$', ChargeHandler),
     (r'^/consume$', ConsumeHandler),
     (r'^/customerDetail$', CustomerDetailHandler),
-    (r'^/downloadCustomerDetail$', DownloadCustomerDetailHandler),
-    (r'^/customerQrCode$', CustomerQrCodeHandler)
+    (r'^/downloadCustomerDetail$', DownloadCustomerDetailHandler)
 ]

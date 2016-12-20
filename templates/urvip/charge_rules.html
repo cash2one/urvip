@@ -17,8 +17,8 @@
     </header>
     
     <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active"><a href="/chargeRules">充值规则</a></li>
-      <li role="presentation"><a href="/customers">会员</a></li>
+        <li role="presentation" class="active"><a href="/chargeRules">充值规则</a></li>
+        <li role="presentation"><a href="/customers">会员</a></li>
     </ul>
 
     <div class="row">
@@ -138,16 +138,19 @@
 <script type="text/javascript" src="/static/script/main.js"></script>
 <script type="text/javascript">
     var userNameElement = document.getElementById('userName');
-        userNameElement.innerHTML = '{{ user_name }}';
-
-    var fullscreenElement = document.getElementById('fullscreen'),
-        editElement = document.getElementById('edit'),
+        userNameElement.innerHTML = '{{ user_name }}',
+        fullscreenElement = document.getElementById('fullscreen'),
+        modals = document.querySelectorAll(".modal"),
+        cancelBtns = document.querySelectorAll(".cancel-btn");
+    /*
+     * 创建充值规则
+     */
+    var editElement = document.getElementById('edit'),
         editNameElement = document.getElementById('editName'),
         editPayoutElement = document.getElementById('editPayout'),
         editBalanceChangeElement = document.getElementById('editBalanceChange'),
         editQuantityChangeElement = document.getElementById('editQuantityChange'),
         editScoreChangeElement = document.getElementById('editScoreChange');
-
     function showEdit() {
         editNameElement.value = "";
         editPayoutElement.value = "";
@@ -156,34 +159,34 @@
         editScoreChangeElement.value = "";
         showModal(editElement);
     }
-
     function confirmEdit() {
         var name = editNameElement.value;
         var payout = editPayoutElement.value;
         var balanceChange = editBalanceChangeElement.value;
         var quantityChange = editQuantityChangeElement.value;
         var scoreChange = editScoreChangeElement.value;
-        if (name && payout && balanceChange && quantityChange && scoreChange) {
-            sendApiRequest("/addChargeRule",
-                           {
-                               "name": name, "payout": payout, "balanceChange": balanceChange,
-                                "quantityChange": quantityChange, "scoreChange": scoreChange
-                           },
-                           function(result) {
-                               window.location.reload();
-                           });
-        } else {
+        if (!name || !payout || (!balanceChange && !quantityChange && !scoreChange)) {
             alert("信息不完整，请补全");
+            return false;
         }
+        sendApiRequest("/addChargeRule",
+                       {
+                           "name": name, "payout": payout, "balanceChange": balanceChange,
+                            "quantityChange": quantityChange, "scoreChange": scoreChange
+                       },
+                       function(result) {
+                           window.location.reload();
+                       });
     }
-
+    /*
+     * 删除充值规则
+     */
     var deleteElement = document.getElementById('delete'),
         deleteNameElement = document.getElementById('deleteName'),
         deletePayoutElement = document.getElementById('deletePayout'),
         deleteBalanceChangeElement = document.getElementById('deleteBalanceChange'),
         deleteQuantityChangeElement = document.getElementById('deleteQuantityChange'),
         deleteScoreChangeElement = document.getElementById('deleteScoreChange');
-
     function showDelete(chargeRule) {
         deleteElement.value = chargeRule['id'];
         deleteNameElement.innerHTML = chargeRule['name'];
@@ -193,7 +196,6 @@
         deleteScoreChangeElement.innerHTML = chargeRule['scoreChange'];
         showModal(deleteElement);
     }
-
     function confirmDelete() {
         var id = deleteElement.value;
         sendApiRequest("/deleteChargeRule",
@@ -202,21 +204,21 @@
                            window.location.reload();
                        });
     }
-
+    /*
+     * 控制模态框的显隐
+     */
     function showModal(modal) {
         fullscreenElement.style.display = "block";
         modal.style.display = "block";
     }
     function hideModal() {
-        var modals = document.querySelectorAll(".modal");
-        for(var i = 0; i < modals.length; i++) {
+        for (var i = 0; i < modals.length; i++) {
             if (modals[i]) {
                 modals[i].style.display = "none";
             }
         }
         fullscreenElement.style.display = "none";
     }
-    var cancelBtns = document.querySelectorAll(".cancel-btn");
     for (var i = 0; i < cancelBtns.length; i++) {
         cancelBtns[i].addEventListener("click", hideModal, false);
     }

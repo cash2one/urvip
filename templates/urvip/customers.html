@@ -286,20 +286,20 @@
 </div>
 
 <script type="text/javascript" src="/static/script/main.js"></script>
-<script type="text/javascript" src="/static/script/qrcode.concat.js"></script>
+<script type="text/javascript" src="/static/script/lazarsoft.jsqrcode.js"></script>
 <script type="text/javascript">
     var userNameElement = document.getElementById('userName');
-        userNameElement.innerHTML = '{{ user_name }}';
-
-    var genders = {"1": "男", "2": "女"},
-        customer = null,
-        fullscreenElement = document.getElementById('fullscreen'),
-        editElement = document.getElementById('edit'),
+        userNameElement.innerHTML = '{{ user_name }}',
+        genders = {"1": "男", "2": "女"},
+        customer = null;
+    /*
+     * 创建会员
+     */
+    var editElement = document.getElementById('edit'),
         editNameElement = document.getElementById('editName'),
         editGenderElement = document.getElementById('editGender'),
         editIdentificationElement = document.getElementById('editIdentification'),
         editCellphoneElement = document.getElementById('editCellphone');
-
     function showEdit(editCustomer) {
         customer = editCustomer;
         editNameElement.value = customer['name'];
@@ -312,46 +312,45 @@
         editCellphoneElement.value = customer['cellphone'];
         showModal(editElement);
     }
-
     function confirmEdit() {
         customer['name'] = editNameElement.value;
         customer['gender'] = editGenderElement.options[editGenderElement.selectedIndex].value;
         customer['identification'] = editIdentificationElement.value;
         customer['cellphone'] = editCellphoneElement.value;
-        if (customer['name'] && customer['gender'] && customer['identification'] && customer['cellphone']) {
-            if (!/^\d{15}$|^\d{17}[0-9Xx]{1}$/.test(customer['identification'])) {
-                console.log(customer['identification'])
-                alert("请输入正确的身份证");
-                return false;
-            }
-            if (!/^1[34578]\d{9}$/.test(customer['cellphone'])) {
-                alert("请输入正确的手机号码");
-                return false;
-            }
-            sendApiRequest("/addCustomer",
-                           {
-                               "name": customer['name'], "gender": customer['gender'],
-                                "identification": customer['identification'], "cellphone": customer['cellphone']
-                           },
-                           function(result) {
-                               window.location.reload();
-                           });
-        } else {
+        if (!customer['name'] || !customer['gender'] || !customer['identification'] && customer['cellphone']) {
             alert("信息不完整，请补全");
+            return false;
         }
+        if (!/^\d{15}$|^\d{17}[0-9Xx]{1}$/.test(customer['identification'])) {
+            alert("请输入正确的身份证");
+            return false;
+        }
+        if (!/^1[34578]\d{9}$/.test(customer['cellphone'])) {
+            alert("请输入正确的手机号码");
+            return false;
+        }
+        sendApiRequest("/addCustomer",
+                       {
+                           "name": customer['name'], "gender": customer['gender'],
+                            "identification": customer['identification'], "cellphone": customer['cellphone']
+                       },
+                       function(result) {
+                           window.location.reload();
+                       });
     };
-
+    /*
+     * 拍照识别会员二维码
+     */
     qrcode.callback = function(data) {
-        alert("图片识别成功，跳转页面");
         hideModal();
-        window.location.href = "customerDetail?card=" + data;
+        window.location.href = "/customers?card=" + data;
     };
     document.getElementById("qr-input").addEventListener("change", function() {
         var reader = new FileReader();
         reader.onload = function (event) {
             var image = new Image();
             image.onload = function() {
-                var scale = Math.min(300 / Math.min(this.width, this.height), 1);
+                var scale = 1; // Math.min(300 / Math.min(this.width, this.height), 1);
                 var width = this.width * scale;
                 var height = this.height * scale;
                 var canvas = document.getElementById("qr-canvas");
@@ -366,11 +365,12 @@
         };
         reader.readAsDataURL(this.files[0]);
     }, false);
-
+    /*
+     * 按手机号查找会员
+     */
     var searchElem = document.getElementById("search"),
         searchCellphoneElem = document.getElementById("searchCellphone"),
         confirmSearchElem = document.getElementById("confirmSearch-btn");
-
     function showSearch() {
         searchCellphoneElem.value = "";
         showModal(searchElem);
@@ -380,12 +380,13 @@
         if (!/^1[34578]\d{9}$/.test(searchCellphoneElem.value)) {
             alert("请输入正确的手机号码");
             return false;
-        } else {
-            hideModal();
-            window.location.href = "customerDetail?cellphone=" + searchCellphoneElem.value;
         }
+        hideModal();
+        window.location.href = "/customers?cellphone=" + searchCellphoneElem.value;
     }, false);
-
+    /*
+     * 会员充值
+     */
     var chargeElement = document.getElementById('charge'),
         chargeIdentificationElement = document.getElementById('chargeIdentification'),
         chargeCellphoneElement = document.getElementById('chargeCellphone'),
@@ -393,7 +394,6 @@
         chargeGenderElement = document.getElementById('chargeGender'),
         chargeRuleElement = document.getElementById('chargeRule'),
         chargeCommentsElement = document.getElementById('chargeComments');
-
     function showCharge(chargeCustomer) {
         customer = chargeCustomer;
         chargeIdentificationElement.innerHTML = customer['identification'];
@@ -404,26 +404,27 @@
         chargeCommentsElement.value = "";
         showModal(chargeElement);
     }
-
     function confirmCharge() {
         var customerId = customer['id'];
         var updateTime = customer['updateTime'];
         var chargeRuleId = chargeRuleElement.options[chargeRuleElement.selectedIndex].value;
         var comments = chargeCommentsElement.value;
-        if (chargeRuleId) {
-            sendApiRequest("/charge",
-                           {
-                               "customerId": customerId, "updateTime": updateTime,
-                                "chargeRuleId": chargeRuleId, "comments": comments
-                           },
-                           function(result) {
-                               window.location.reload();
-                           });
-        } else {
+        if (!chargeRuleId) {
             alert("信息不完整，请补全");
+            return false;
         }
+        sendApiRequest("/charge",
+                       {
+                           "customerId": customerId, "updateTime": updateTime,
+                            "chargeRuleId": chargeRuleId, "comments": comments
+                       },
+                       function(result) {
+                           window.location.reload();
+                       });
     }
-
+    /*
+     * 会员消费
+     */
     var consumeElement = document.getElementById('consume'),
         consumeIdentificationElement = document.getElementById('consumeIdentification'),
         consumeCellphoneElement = document.getElementById('consumeCellphone'),
@@ -436,7 +437,6 @@
         consumeAvailableScoreElement = document.getElementById('consumeAvailableScore'),
         consumeScoreElement = document.getElementById('consumeScore'),
         consumeCommentsElement = document.getElementById('consumeComments');
-
     function showConsume(consumeCustomer) {
         customer = consumeCustomer;
         consumeIdentificationElement.innerHTML = customer['identification'];
@@ -452,7 +452,6 @@
         consumeCommentsElement.value = '';
         showModal(consumeElement);
     }
-
     function confirmConsume() {
         var customerId = customer['id'];
         var updateTime = customer['updateTime'];
@@ -470,7 +469,9 @@
                            window.location.reload();
                        });
     }
-
+    /*
+     * 删除会员
+     */
     var deleteElement = document.getElementById('delete');
         deleteIdentificationElement = document.getElementById('deleteIdentification'),
         deleteCellphoneElement = document.getElementById('deleteCellphone'),
@@ -479,7 +480,6 @@
         deleteBalanceElement = document.getElementById('deleteBalance'),
         deleteQuantityElement = document.getElementById('deleteQuantity'),
         deleteScoreElement = document.getElementById('deleteScore');
-
     function showDelete(deleteCustomer) {
         customer = deleteCustomer;
         deleteIdentificationElement.innerHTML = customer['identification'];
@@ -491,7 +491,6 @@
         deleteScoreElement.innerHTML = customer['score'];
         showModal(deleteElement);
     }
-
     function confirmDelete() {
         var customerId = customer['id'];
         sendApiRequest("/deleteCustomer",
@@ -500,17 +499,20 @@
                            window.location.reload();
                        });
     }
-
+    /*
+     * 控制模态框的显隐
+     */
+    var fullscreenElement = document.getElementById('fullscreen'),
+        modals = document.querySelectorAll(".modal"),
+        cancelBtns = document.querySelectorAll(".cancel-btn");;
     function showModal(modal) {
         fullscreenElement.style.display = "block";
         modal.style.display = "block";
     }
-
     function hideModal(event) {
         if (event) {
             event.preventDefault();
         }
-        var modals = document.querySelectorAll(".modal");
         for (var i = 0; i < modals.length; i++) {
             if (modals[i]) {
                 modals[i].style.display = "none";
@@ -518,7 +520,6 @@
         }
         fullscreenElement.style.display = "none";
     }
-    var cancelBtns = document.querySelectorAll(".cancel-btn");
     for (var i = 0; i < cancelBtns.length; i++) {
         cancelBtns[i].addEventListener("click", hideModal, false);
     }
