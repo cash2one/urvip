@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+    <title>充值规则</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+<div class="container-fluid container">
+    <header>
+        <h5>
+            <p>您好,<span id="userName"></span></p>
+            <button onclick="logout();" class="btn btn-danger btn-xs pull-right">退出</button>
+        </h5>
+    </header>
+    
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="/chargeRules">充值规则</a></li>
+      <li role="presentation"><a href="/customers">会员</a></li>
+    </ul>
+
+    <div class="row">
+        <div class="col-lg-12 col-mg-12">
+            <button onclick="showEdit();" class="btn btn-primary pull-right add-btn">添加</button>
+        </div>
+    </div>
+    <div class="table-box">
+        <ul class="fix-name">
+            <li class="fix-head">名称</li>
+            {% for i in range(len(charge_rules)) %}
+            {% set charge_rule = charge_rules[i] %}
+            <li class="fix-item">{{ charge_rule.name }}</li>
+            {% end %}
+        </ul>
+        <div class="table-responsive">
+            <table class="table table-striped hide-head-table">
+                <thead>
+                    <tr>
+                    <th><span>名称</span></th>
+                    <th>支付金额</th>
+                    <th>得到金额</th>
+                    <th>得到次数</th>
+                    <th>得到积分</th>
+                    <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for i in range(len(charge_rules)) %}
+                {% set charge_rule = charge_rules[i] %}
+                <tr>
+                    <td><span>{{ charge_rule.name }}</span></td>
+                    <td>{{ charge_rule.payout }}</td>
+                    <td>{{ charge_rule.balanceChange }}</td>
+                    <td>{{ charge_rule.quantityChange }}</td>
+                    <td>{{ charge_rule.scoreChange }}</td>
+                    {% set vo = {'id': charge_rule.id, 'name': charge_rule.name, 'payout': charge_rule.payout, 'balanceChange': charge_rule.balanceChange, 'quantityChange': charge_rule.quantityChange, 'scoreChange': charge_rule.scoreChange} %}
+                    <td><a href="#" onclick="showDelete({{ vo }});" class="a-in-table">删除</a></td>
+                </tr>
+                {% end %}  
+                </tbody>
+            </tr>
+            </table>
+        </div>
+    </div>
+    <div id="fullscreen">
+        <div id="edit" class="modal modal-lg">
+            <div class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="editName" class="col-sm-2 col-xs-4">名称</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input type="text" class="form-control" id="editName" placeholder="请输入规则名称" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editPayout" class="col-sm-2 col-xs-4">支付金额</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input type="number" id="editPayout" class="form-control"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editBalanceChange" class="col-sm-2 col-xs-4">得到金额</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input type="number" id="editBalanceChange" class="form-control"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editQuantityChange" class="col-sm-2 col-xs-4">得到次数</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input type="number" id="editQuantityChange" class="form-control"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editScoreChange" class="col-sm-2 col-xs-4">得到积分</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input type="number" id="editScoreChange" class="form-control"/>
+                    </div>
+                </div>
+            </div>
+            <div class="mymodal-footer">
+                <a href="javascript:;" class="cancel-btn">取消</a>
+                <a href="javascript:;" class="confirm-btn" onclick="confirmEdit();">保存</a>
+            </div>
+        </div>
+        
+        <div id="delete" class="modal modal-lg">
+            <div class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">名称</label>
+                    <p id="deleteName" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">支付金额</label>
+                    <p id="deletePayout" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">得到金额</label>
+                    <p id="deleteBalanceChange" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">得到次数</label>
+                    <p id="deleteQuantityChange" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">得到积分</label>
+                    <p id="deleteScoreChange" class="form-control-static"></p>
+                </div>
+            
+            </div>
+            <div class="mymodal-footer">
+                <a href="javascript:;" class="cancel-btn">取消</a>
+                <a href="javascript:;" class="confirm-btn" onclick="confirmDelete();">删除</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/static/script/main.js"></script>
+<script type="text/javascript">
+    var userNameElement = document.getElementById('userName');
+        userNameElement.innerHTML = '{{ user_name }}';
+
+    var fullscreenElement = document.getElementById('fullscreen'),
+        editElement = document.getElementById('edit'),
+        editNameElement = document.getElementById('editName'),
+        editPayoutElement = document.getElementById('editPayout'),
+        editBalanceChangeElement = document.getElementById('editBalanceChange'),
+        editQuantityChangeElement = document.getElementById('editQuantityChange'),
+        editScoreChangeElement = document.getElementById('editScoreChange');
+
+    function showEdit() {
+        editNameElement.value = "";
+        editPayoutElement.value = "";
+        editBalanceChangeElement.value = "";
+        editQuantityChangeElement.value = "";
+        editScoreChangeElement.value = "";
+        showModal(editElement);
+    }
+
+    function confirmEdit() {
+        var name = editNameElement.value;
+        var payout = editPayoutElement.value;
+        var balanceChange = editBalanceChangeElement.value;
+        var quantityChange = editQuantityChangeElement.value;
+        var scoreChange = editScoreChangeElement.value;
+        if (name && payout && balanceChange && quantityChange && scoreChange) {
+            sendApiRequest("/addChargeRule",
+                           {
+                               "name": name, "payout": payout, "balanceChange": balanceChange,
+                                "quantityChange": quantityChange, "scoreChange": scoreChange
+                           },
+                           function(result) {
+                               window.location.reload();
+                           });
+        } else {
+            alert("信息不完整，请补全");
+        }
+    }
+
+    var deleteElement = document.getElementById('delete'),
+        deleteNameElement = document.getElementById('deleteName'),
+        deletePayoutElement = document.getElementById('deletePayout'),
+        deleteBalanceChangeElement = document.getElementById('deleteBalanceChange'),
+        deleteQuantityChangeElement = document.getElementById('deleteQuantityChange'),
+        deleteScoreChangeElement = document.getElementById('deleteScoreChange');
+
+    function showDelete(chargeRule) {
+        deleteElement.value = chargeRule['id'];
+        deleteNameElement.innerHTML = chargeRule['name'];
+        deletePayoutElement.innerHTML = chargeRule['payout'];
+        deleteBalanceChangeElement.innerHTML = chargeRule['balanceChange'];
+        deleteQuantityChangeElement.innerHTML = chargeRule['quantityChange'];
+        deleteScoreChangeElement.innerHTML = chargeRule['scoreChange'];
+        showModal(deleteElement);
+    }
+
+    function confirmDelete() {
+        var id = deleteElement.value;
+        sendApiRequest("/deleteChargeRule",
+                       {"id": id},
+                       function(result) {
+                           window.location.reload();
+                       });
+    }
+
+    function showModal(modal) {
+        fullscreenElement.style.display = "block";
+        modal.style.display = "block";
+    }
+    function hideModal() {
+        var modals = document.querySelectorAll(".modal");
+        for(var i = 0; i < modals.length; i++) {
+            if (modals[i]) {
+                modals[i].style.display = "none";
+            }
+        }
+        fullscreenElement.style.display = "none";
+    }
+    var cancelBtns = document.querySelectorAll(".cancel-btn");
+    for (var i = 0; i < cancelBtns.length; i++) {
+        cancelBtns[i].addEventListener("click", hideModal, false);
+    }
+</script>
+</body>
+</html>

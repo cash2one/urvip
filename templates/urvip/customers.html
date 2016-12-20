@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+    <title>会员</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+<div class="container-fluid container">
+    <header>
+        <h5>
+            <p>您好,<span id="userName"></span></p>
+            <button onclick="logout();" class="btn btn-danger btn-xs pull-right">退出</button>
+        </h5>
+    </header>
+    
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation"><a href="/chargeRules">充值规则</a></li>
+      <li role="presentation" class="active"><a href="/customers">会员</a></li>
+    </ul>
+    <div class="row">
+        <div class="col-lg-12 col-mg-12">
+            <button onclick="showEdit({'id': 0, 'timestamp': 0, 'identification': '', 'cellphone': '', 'name': '', 'gender': 1, 'balance': 0, 'quantity': 0, 'score': 0});" class="btn btn-primary pull-right add-btn">添加</button>
+            <button onclick="showSearch();" class="btn btn-primary pull-right add-btn">查找</button>
+        </div>
+    </div>
+    <div class="table-box">
+        <ul class="fix-name">
+            <li class="fix-head">姓名</li>
+            {% for i in range(len(customers)) %}
+            {% set customer = customers[i] %}
+            <li class="fix-item">{{customer.name}}</li>
+            {% end %}
+        </ul>
+        <div class="table-responsive">
+            <table class="table table-striped hide-head-table">
+                <thead>
+                    <tr>
+                    <th><span>姓名</span></th>
+                    <th>性别</th>
+                    <th>身份证</th>
+                    <th>手机</th>
+                    <th>剩余金额</th>
+                    <th>剩余次数</th>
+                    <th>可用积分</th>
+                    <th>操作</th>
+                    </tr>  
+                </thead>
+                <tbody>
+                {% for i in range(len(customers)) %}
+                {% set customer = customers[i] %}
+                <tr>
+                    <td><span>{{ customer.name }}</span></td>
+                    <td>{{ {"1": "男", "2": "女"}[str(customer.gender)] }}</td>
+                    <td>{{ customer.identification }}&nbsp;</td>
+                    <td>{{ customer.cellphone }}</td>
+                    <td>{{ customer.balance }}</td>
+                    <td>{{ customer.quantity }}</td>
+                    <td>{{ customer.score }}</td>
+                    <td>
+                        {% set vo = {'id': customer.id, 'updateTime': customer.updateTime.timestamp(), 'identification': customer.identification, 'cellphone': customer.cellphone, 'name': customer.name, 'gender': customer.gender, 'balance': customer.balance, 'quantity': customer.quantity, 'score': customer.score} %}
+                        <a href="javascript:;"  class="a-in-table" onclick="showCharge({{ vo }});">充值</a>
+                        <a href="javascript:;"  class="a-in-table" onclick="showConsume({{ vo }});">消费</a>
+                        <a href="/customerDetail?id={{ customer.id }}" class="a-in-table" >明细</a>
+                        <a href="javascript:;"  class="a-in-table" onclick="showDelete({{ vo }});">删除</a>
+                    </td>
+                </tr>
+                {% end %}  
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="paging text-center">
+        {% if page_num > 0 %}
+            <span>
+                <a href="/customers?page={{ page_num - 1 }}" dis>前一页</a>
+            </span>
+        {% end %}
+            
+            <span>
+                第{{ page_num + 1 }}/{{ page_count }}页
+            </span>
+        
+        {% if page_num < page_count - 1 %}
+            <span>
+                <a href="/customers?page={{ page_num + 1 }}">后一页</a>
+            </span>
+        {% end %}
+    </div>
+    <div id="fullscreen">
+        <div id="edit" class="modal modal-lg">
+            <div class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="editName" class="col-sm-2 col-xs-4">姓名</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input type="text" class="form-control" id="editName" placeholder="请输入姓名">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editName" class="col-sm-2 col-xs-4">性别</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <select id="editGender" class="form-control">
+                            <option value="1">男</option>
+                            <option value="2">女</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editIdentification" class="col-sm-2 col-xs-4">身份证</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input type="text" class="form-control" id="editIdentification" placeholder="请输入身份证号码">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editCellphone" class="col-sm-2 col-xs-4">手机</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input type="text" class="form-control" id="editCellphone" placeholder="请输入手机号码">
+                    </div>
+                </div>
+            </div>
+            <div class="mymodal-footer">
+                <a href="javacript:;" class="cancel-btn">取消</a>
+                <a href="javacript:;" class="confirm-btn" onclick="confirmEdit();">保存</a>
+            </div>
+        </div>
+        <div id="search" class="modal">
+            <div class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="qr-input" class="btn btn-info btn-lg text-center">拍照扫描二维码</label>
+                    <div class="line"><span>或</span></div>
+                    <input id="qr-input" type="file" accept="image/*;capture=camera" />
+                    <canvas id="qr-canvas"></canvas>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12 col-xs-12">
+                        <input type="text" class="form-control" id="searchCellphone" placeholder="请输入手机号码" />
+                    </div>
+                </div>
+            </div>
+            <div class="mymodal-footer">
+                <a href="javacript:;" class="cancel-btn">取消</a>
+                <a href="javacript:;" class="confirm-btn" id="confirmSearch-btn">查找</a>
+            </div>
+        </div>
+        <div id="charge" class="modal modal-lg">
+            <div class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">姓名</label>
+                    <p id="chargeName" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">性别</label>
+                    <p id="chargeGender" class="form-control-static "></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">身份证</label>
+                    <p id="chargeIdentification" class="form-control-static "></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">手机</label>
+                    <p id="chargeCellphone" class="form-control-static "></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">充值</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <select id="chargeRule" class="form-control">
+                            {% for i in range(len(charge_rules)) %}
+                            {% set charge_rule = charge_rules[i] %}
+                            <option value="{{ charge_rule.id }}">{{ charge_rule.name }}</option>
+                            {% end %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">备注</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input id="chargeComments" type="text" class="form-control" placeholder="请输入备注"/>
+                    </div>
+                </div>
+            </div>
+            <div class="mymodal-footer">
+                <a href="javascript:;" class="cancel-btn">取消</a>
+                <a href="javascript:;" class="confirm-btn" onclick="confirmCharge();">充值</a>
+            </div>
+        </div>
+
+        <div id="consume" class="modal modal-lg">
+            <div class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">姓名</label>
+                    <p id="consumeName" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">性别</label>
+                    <p id="consumeGender" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">身份证</label>
+                    <p id="consumeIdentification" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">手机</label>
+                    <p id="consumeCellphone" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">
+                        <p>金额</p>
+                        (可用:<span id="consumeAvailableBalance"></span>)
+                    </label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input id="consumeBalance" type="number" class="form-control"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">
+                        <p>次数</p>
+                        (可用:<span id="consumeAvailableQuantity"></span>)
+                    </label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input id="consumeQuantity" type="number" class="form-control"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">
+                        <p>积分</p>
+                        (可用:<span id="consumeAvailableScore"></span>)
+                    </label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input id="consumeScore" type="number" class="form-control"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">备注</label>
+                    <div class="col-sm-10 col-xs-8">
+                        <input id="consumeComments" type="text" class="form-control" placeholder="请输入备注"/>
+                    </div>
+                </div>
+            </div>
+            <div class="mymodal-footer">
+                <a href="javascript:;" class="cancel-btn">取消</a>
+                <a href="javascript:;" class="confirm-btn" onclick="confirmConsume();">消费</a>
+            </div>
+        </div>
+    
+        <div id="delete" class="modal modal-lg">
+            <div class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">姓名</label>
+                    <p id="deleteName" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">性别</label>
+                    <p id="deleteGender" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">身份证</label>
+                    <p id="deleteIdentification" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">手机</label>
+                    <p id="deleteCellphone" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">剩余金额</label>
+                    <p id="deleteBalance" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">剩余次数</label>
+                    <p id="deleteQuantity" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-4">可用积分</label>
+                    <p id="deleteScore" class="form-control-static"></p>
+                </div>
+            </div>
+            <div class="mymodal-footer">
+                <a href="javascript:;" class="cancel-btn">取消</a>
+                <a href="javascript:;" class="confirm-btn" onclick="confirmDelete();">删除</a>
+            </div>
+    </div>
+    </div>
+    
+</div>
+
+<script type="text/javascript" src="/static/script/main.js"></script>
+<script type="text/javascript" src="/static/script/qrcode.concat.js"></script>
+<script type="text/javascript">
+    var userNameElement = document.getElementById('userName');
+        userNameElement.innerHTML = '{{ user_name }}';
+
+    var genders = {"1": "男", "2": "女"},
+        customer = null,
+        fullscreenElement = document.getElementById('fullscreen'),
+        editElement = document.getElementById('edit'),
+        editNameElement = document.getElementById('editName'),
+        editGenderElement = document.getElementById('editGender'),
+        editIdentificationElement = document.getElementById('editIdentification'),
+        editCellphoneElement = document.getElementById('editCellphone');
+
+    function showEdit(editCustomer) {
+        customer = editCustomer;
+        editNameElement.value = customer['name'];
+        for (var i = 0; i < editGenderElement.options.length; i++) {
+            if (editGenderElement.options[i].value == customer['gender']) {
+                editGenderElement.selectedIndex = i;
+            }
+        }
+        editIdentificationElement.value = customer['identification'];
+        editCellphoneElement.value = customer['cellphone'];
+        showModal(editElement);
+    }
+
+    function confirmEdit() {
+        customer['name'] = editNameElement.value;
+        customer['gender'] = editGenderElement.options[editGenderElement.selectedIndex].value;
+        customer['identification'] = editIdentificationElement.value;
+        customer['cellphone'] = editCellphoneElement.value;
+        if (customer['name'] && customer['gender'] && customer['identification'] && customer['cellphone']) {
+            if (!/^\d{15}$|^\d{17}[0-9Xx]{1}$/.test(customer['identification'])) {
+                console.log(customer['identification'])
+                alert("请输入正确的身份证");
+                return false;
+            }
+            if (!/^1[34578]\d{9}$/.test(customer['cellphone'])) {
+                alert("请输入正确的手机号码");
+                return false;
+            }
+            sendApiRequest("/addCustomer",
+                           {
+                               "name": customer['name'], "gender": customer['gender'],
+                                "identification": customer['identification'], "cellphone": customer['cellphone']
+                           },
+                           function(result) {
+                               window.location.reload();
+                           });
+        } else {
+            alert("信息不完整，请补全");
+        }
+    };
+
+    qrcode.callback = function(data) {
+        alert("图片识别成功，跳转页面");
+        hideModal();
+        window.location.href = "customerDetail?card=" + data;
+    };
+    document.getElementById("qr-input").addEventListener("change", function() {
+        var reader = new FileReader();
+        reader.onload = function (event) {
+            var image = new Image();
+            image.onload = function() {
+                var scale = Math.min(300 / Math.min(this.width, this.height), 1);
+                var width = this.width * scale;
+                var height = this.height * scale;
+                var canvas = document.getElementById("qr-canvas");
+                canvas.width = width;
+                canvas.height = height;
+                var context = canvas.getContext("2d");
+                context.clearRect(0, 0, width, height);
+                context.drawImage(this, 0, 0, width, height);
+                qrcode.decode();
+            };
+            image.src = event.target.result;
+        };
+        reader.readAsDataURL(this.files[0]);
+    }, false);
+
+    var searchElem = document.getElementById("search"),
+        searchCellphoneElem = document.getElementById("searchCellphone"),
+        confirmSearchElem = document.getElementById("confirmSearch-btn");
+
+    function showSearch() {
+        searchCellphoneElem.value = "";
+        showModal(searchElem);
+    };
+    confirmSearchElem.addEventListener("click", function(event) {
+        event.preventDefault();
+        if (!/^1[34578]\d{9}$/.test(searchCellphoneElem.value)) {
+            alert("请输入正确的手机号码");
+            return false;
+        } else {
+            hideModal();
+            window.location.href = "customerDetail?cellphone=" + searchCellphoneElem.value;
+        }
+    }, false);
+
+    var chargeElement = document.getElementById('charge'),
+        chargeIdentificationElement = document.getElementById('chargeIdentification'),
+        chargeCellphoneElement = document.getElementById('chargeCellphone'),
+        chargeNameElement = document.getElementById('chargeName'),
+        chargeGenderElement = document.getElementById('chargeGender'),
+        chargeRuleElement = document.getElementById('chargeRule'),
+        chargeCommentsElement = document.getElementById('chargeComments');
+
+    function showCharge(chargeCustomer) {
+        customer = chargeCustomer;
+        chargeIdentificationElement.innerHTML = customer['identification'];
+        chargeCellphoneElement.innerHTML = customer['cellphone'];
+        chargeNameElement.innerHTML = customer['name'];
+        chargeGenderElement.innerHTML = genders[customer['gender']];
+        chargeRuleElement.selectedIndex = 0;
+        chargeCommentsElement.value = "";
+        showModal(chargeElement);
+    }
+
+    function confirmCharge() {
+        var customerId = customer['id'];
+        var updateTime = customer['updateTime'];
+        var chargeRuleId = chargeRuleElement.options[chargeRuleElement.selectedIndex].value;
+        var comments = chargeCommentsElement.value;
+        if (chargeRuleId) {
+            sendApiRequest("/charge",
+                           {
+                               "customerId": customerId, "updateTime": updateTime,
+                                "chargeRuleId": chargeRuleId, "comments": comments
+                           },
+                           function(result) {
+                               window.location.reload();
+                           });
+        } else {
+            alert("信息不完整，请补全");
+        }
+    }
+
+    var consumeElement = document.getElementById('consume'),
+        consumeIdentificationElement = document.getElementById('consumeIdentification'),
+        consumeCellphoneElement = document.getElementById('consumeCellphone'),
+        consumeNameElement = document.getElementById('consumeName'),
+        consumeGenderElement = document.getElementById('consumeGender'),
+        consumeAvailableBalanceElement = document.getElementById('consumeAvailableBalance'),
+        consumeBalanceElement = document.getElementById('consumeBalance'),
+        consumeAvailableQuantityElement = document.getElementById('consumeAvailableQuantity'),
+        consumeQuantityElement = document.getElementById('consumeQuantity'),
+        consumeAvailableScoreElement = document.getElementById('consumeAvailableScore'),
+        consumeScoreElement = document.getElementById('consumeScore'),
+        consumeCommentsElement = document.getElementById('consumeComments');
+
+    function showConsume(consumeCustomer) {
+        customer = consumeCustomer;
+        consumeIdentificationElement.innerHTML = customer['identification'];
+        consumeCellphoneElement.innerHTML = customer['cellphone'];
+        consumeNameElement.innerHTML = customer['name'];
+        consumeGenderElement.innerHTML = genders[customer['gender']];
+        consumeAvailableBalanceElement.innerHTML = customer['balance'];
+        consumeBalanceElement.value = '';
+        consumeAvailableQuantityElement.innerHTML = customer['quantity'];
+        consumeQuantityElement.value = '';
+        consumeAvailableScoreElement.innerHTML = customer['score'];
+        consumeScoreElement.value = '';
+        consumeCommentsElement.value = '';
+        showModal(consumeElement);
+    }
+
+    function confirmConsume() {
+        var customerId = customer['id'];
+        var updateTime = customer['updateTime'];
+        var balanceChange = -parseFloat(consumeBalanceElement.value);
+        var quantityChange = -parseInt(consumeQuantityElement.value);
+        var scoreChange = -parseInt(consumeScoreElement.value);
+        var comments = consumeCommentsElement.value;
+        sendApiRequest("/consume",
+                       {
+                           "customerId": customerId, "updateTime": updateTime,
+                            "balanceChange": balanceChange, "quantityChange": quantityChange,
+                             "scoreChange": scoreChange, "comments": comments
+                       },
+                       function(result) {
+                           window.location.reload();
+                       });
+    }
+
+    var deleteElement = document.getElementById('delete');
+        deleteIdentificationElement = document.getElementById('deleteIdentification'),
+        deleteCellphoneElement = document.getElementById('deleteCellphone'),
+        deleteNameElement = document.getElementById('deleteName'),
+        deleteGenderElement = document.getElementById('deleteGender'),
+        deleteBalanceElement = document.getElementById('deleteBalance'),
+        deleteQuantityElement = document.getElementById('deleteQuantity'),
+        deleteScoreElement = document.getElementById('deleteScore');
+
+    function showDelete(deleteCustomer) {
+        customer = deleteCustomer;
+        deleteIdentificationElement.innerHTML = customer['identification'];
+        deleteCellphoneElement.innerHTML = customer['cellphone'];
+        deleteNameElement.innerHTML = customer['name'];
+        deleteGenderElement.innerHTML = genders[customer['gender']];
+        deleteBalanceElement.innerHTML = customer['balance'];
+        deleteQuantityElement.innerHTML = customer['quantity'];
+        deleteScoreElement.innerHTML = customer['score'];
+        showModal(deleteElement);
+    }
+
+    function confirmDelete() {
+        var customerId = customer['id'];
+        sendApiRequest("/deleteCustomer",
+                       {"id": customerId},
+                       function(result) {
+                           window.location.reload();
+                       });
+    }
+
+    function showModal(modal) {
+        fullscreenElement.style.display = "block";
+        modal.style.display = "block";
+    }
+
+    function hideModal(event) {
+        if (event) {
+            event.preventDefault();
+        }
+        var modals = document.querySelectorAll(".modal");
+        for (var i = 0; i < modals.length; i++) {
+            if (modals[i]) {
+                modals[i].style.display = "none";
+            }
+        }
+        fullscreenElement.style.display = "none";
+    }
+    var cancelBtns = document.querySelectorAll(".cancel-btn");
+    for (var i = 0; i < cancelBtns.length; i++) {
+        cancelBtns[i].addEventListener("click", hideModal, false);
+    }
+</script>
+</body>
+</html>

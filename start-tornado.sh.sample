@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ ${0:0:1} = "/" ] || [ ${0:0:1} = "~" ]; then
+    cd `dirname ${0}`"/urvip"
+else
+    cd `dirname $(pwd)/${0}`"/urvip"
+fi
+nohup python3.5 -m main --log_file_prefix=../logs/tornado.log --log_file_num_backups=10 > ../logs/start-tornado.log 2>&1 &

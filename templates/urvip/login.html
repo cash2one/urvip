@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+    <title>登录</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/login.css">
+</head>
+<body>
+<div class="container">
+    <div class="main">
+        <form role="form" action="/login" method="post">
+            <div class="form-group">
+                <label for="cellphone" class="pull-left">手机号</label>
+                <input type="text" id="cellphone" name="cellphone" class="form-control" type="text" placeholder="请输入手机号"/>
+                <a id="resendCaptcha" href="javascript:;" class="pull-right">发送验证码</a>
+            </div>
+            <div class="form-group">
+                <label for="captcha" class="pull-left">验证码</label>
+                <input type="text" name="captcha" class="form-control" id="captcha" placeholder="请输入验证码">
+            </div>
+            <input type="submit" class="btn btn-primary btn-lg btn-block" id="login" value="登录" disabled="true">
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript" src="/static/script/main.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+    var cellphoneElem = document.getElementById("cellphone"),
+        captchaElem = document.getElementById("captcha"),
+        loginElem = document.getElementById("login"),
+        resendCaptchaElem = document.getElementById("resendCaptcha");
+
+    var loginValid = function(){
+        if(/^1[34578]\d{9}$/.test(cellphoneElem.value) && /^\d{6}$/.test(captchaElem.value)){
+            loginElem.disabled = false;
+        }else{
+            loginElem.disabled = true;
+        }
+    };
+    cellphoneElem.addEventListener("input", loginValid);
+    captchaElem.addEventListener("input", loginValid);
+
+    var countDown = function(seconds) {
+        var count = setInterval(function() {
+            if (seconds == 0) {
+                clearInterval(count);
+                resendCaptchaElem.innerHTML = "发送验证码";
+                resendCaptchaElem.disabled = false;
+            } else {
+                resendCaptchaElem.innerHTML = "重新发送(" + seconds + ")";
+                resendCaptchaElem.disabled = true;
+                seconds -= 1;
+            }
+        },1000)
+    }
+    var resendCaptchaFoo = function() {
+        if (resendCaptchaElem.disabled) {
+            return false;
+        }
+        var cellphone = cellphoneElem.value;
+        if (!(/^1[34578]\d{9}$/.test(cellphone))) {
+            alert("请输入正确的手机号");
+            return false;
+        }
+        console.log("send");
+        countDown(60);
+        sendApiRequest("/sendCaptcha", {"cellphone": cellphone}, function(result) {});
+    }
+    resendCaptchaElem.addEventListener("click",resendCaptchaFoo);
+}
+</script>
+</body>
+</html>
