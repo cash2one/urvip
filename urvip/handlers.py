@@ -81,7 +81,7 @@ class CustomersHandler(PageHandler):
             customers, page_num, page_count = Customer.list_by_page(self.db, self.current_user.id, page_num)
         else:
             customer = Customer.get(self.db, self.current_user.sellerId, card=card, cellphone=cellphone)
-            customers, page_num, page_count = [customer], 0, 1
+            customers, page_num, page_count = [customer] if customer else [], 0, 1
         charge_rules = ChargeRule.list(self.db, self.current_user.sellerId)
         return self.render('urvip/customers.html',
                            user_name=self.current_user.cellphone,

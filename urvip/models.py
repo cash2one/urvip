@@ -212,15 +212,15 @@ class Customer(BaseModel):
         if id:
             return db.query(Customer).filter(Customer.id == id,
                                              Customer.sellerId == seller_id,
-                                             Customer.status == 1).one()
+                                             Customer.status == 1).first()
         elif card:
             return db.query(Customer).filter(Customer.card == card,
                                              Customer.sellerId == seller_id,
-                                             Customer.status == 1).one()
+                                             Customer.status == 1).first()
         elif cellphone:
             return db.query(Customer).filter(Customer.cellphone == cellphone,
                                              Customer.sellerId == seller_id,
-                                             Customer.status == 1).one()
+                                             Customer.status == 1).first()
         else:
             raise Exception
 
