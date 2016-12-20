@@ -1,0 +1,43 @@
+import tornado.options
+
+tornado.options.define('port', default=8000, type=int)
+tornado.options.define('debug', default=True, type=bool)
+tornado.options.define('num_processes', default=1, type=int)
+tornado.options.define('session_expire_after', default=30 * 24 * 60 * 60, type=int)
+tornado.options.define('cookie_secret', default='', type=str)
+
+tornado.options.define('mysql_host', default='127.0.0.1', type=str)
+tornado.options.define('mysql_port', default=3306, type=int)
+tornado.options.define('mysql_database', default='urvip', type=str)
+tornado.options.define('mysql_user', default='root', type=str)
+tornado.options.define('mysql_password', default='', type=str)
+
+tornado.options.define('redis_session_db_host', default='127.0.0.1', type=str)
+tornado.options.define('redis_session_db_port', default=6379, type=int)
+tornado.options.define('redis_session_db_database', default=2, type=int)
+tornado.options.define('redis_session_db_timeout', default=0.1, type=float)
+
+tornado.options.define('redis_cache_db_host', default='127.0.0.1', type=str)
+tornado.options.define('redis_cache_db_port', default=6379, type=int)
+tornado.options.define('redis_cache_db_database', default=1, type=int)
+tornado.options.define('redis_cache_db_timeout', default=0.1, type=float)
+
+tornado.options.define('oss_access_key_id', default='', type=str)
+tornado.options.define('oss_access_key_secret', default='', type=str)
+tornado.options.define('oss_endpoint', default='', type=str)
+tornado.options.define('oss_img_endpoint', default='', type=str)
+tornado.options.define('oss_bucket_name', default='', type=str)
+
+tornado.options.define('send_sms_url', default='', type=str)
+tornado.options.define('send_sms_user_name', default='', type=str)
+tornado.options.define('send_sms_password_md5', default='', type=str)
+tornado.options.define('send_sms_api_key', default='', type=str)
+tornado.options.define('send_sms_timeout', default=3, type=int)
+
+tornado.options.define('send_mail_host', default='', type=str)
+tornado.options.define('send_mail_port', default=25, type=int)
+tornado.options.define('send_mail_user', default='', type=str)
+tornado.options.define('send_mail_password', default='', type=str)
+tornado.options.define('send_mail_timeout', default=3, type=int)
+
+tornado.options.parse_command_line()

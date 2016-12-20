@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
     <title>会员</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
 </head>
@@ -313,34 +313,37 @@
         showModal(editElement);
     }
     function confirmEdit() {
-        customer['name'] = editNameElement.value;
-        customer['gender'] = editGenderElement.options[editGenderElement.selectedIndex].value;
-        customer['identification'] = editIdentificationElement.value;
-        customer['cellphone'] = editCellphoneElement.value;
-        if (!customer['name']) {
+        customer["name"] = editNameElement.value;
+        customer["gender"] = editGenderElement.options[editGenderElement.selectedIndex].value;
+        customer["identification"] = editIdentificationElement.value;
+        customer["cellphone"] = editCellphoneElement.value;
+        if (!customer["name"]) {
             alert("请填写姓名");
             return false;
         }
-        if (!customer['gender']) {
+        if (!customer["gender"]) {
             alert("请填写性别");
             return false;
         }
-        if (!customer['cellphone']) {
+        if (!customer["cellphone"]) {
             alert("请填写手机号");
             return false;
         }
-        if (!isValidCellphone(customer['cellphone'])) {
+        if (!isValidCellphone(customer["cellphone"])) {
             alert("手机号格式不正确");
             return false;
         }
-        if (customer['identification'] && !isValidIdentification(customer['identification'])) {
+        if (customer["identification"] && !isValidIdentification(customer["identification"])) {
             alert("身份证格式不正确");
             return false;
         }
+        if (!customer["cellphone"].startsWith("+")) {
+            customer["cellphone"] = "+86" + customer["cellphone"];
+        }
         sendApiRequest("/addCustomer",
                        {
-                           "name": customer['name'], "gender": customer['gender'],
-                            "identification": customer['identification'], "cellphone": customer['cellphone']
+                           "name": customer["name"], "gender": customer['gender'],
+                            "identification": customer["identification"], "cellphone": customer["cellphone"]
                        },
                        function(result) {
                            window.location.reload();
@@ -389,12 +392,15 @@
     };
     confirmSearchElem.addEventListener("click", function(event) {
         event.preventDefault();
-        if (!isValidCellphone(searchCellphoneElem.value)) {
+        var cellphone = searchCellphoneElem.value;
+        if (!isValidCellphone(cellphone)) {
             alert("手机号不正确");
             return false;
         }
-        hideModal();
-        window.location.href = "/customers?cellphone=" + searchCellphoneElem.value;
+        if (!cellphone.startsWith("+")) {
+            cellphone = "+86" + cellphone;
+        }
+        window.location.href = "/customers?cellphone=" + encodeURIComponent(cellphone);
     }, false);
     /*
      * 会员充值
@@ -465,23 +471,26 @@
         showModal(consumeElement);
     }
     function confirmConsume() {
-        var customerId = customer['id'];
-        var updateTime = customer['updateTime'];
-        if (!isValidFloat(consumeBalanceElement.value)) {
+        var customerId = customer["id"];
+        var consumeBalance = consumeBalanceElement.value ? consumeBalanceElement.value : "0";
+        var consumeQuantity = consumeQuantityElement.value ? consumeQuantityElement.value : "0";
+        var consumeScore = consumeScoreElement.value ? consumeScoreElement.value : "0";
+        var updateTime = customer["updateTime"];
+        if (!isValidFloat(consumeBalance)) {
             alert("消费金额不正确");
             return false;
         }
-        if (!isValidInteger(consumeQuantityElement.value)) {
-            alert("消费次数不正确);
+        if (!isValidInteger(consumeQuantity)) {
+            alert("消费次数不正确");
             return false;
         }
-        if (!isValidInteger(consumeScoreElement.value)) {
+        if (!isValidInteger(consumeScore)) {
             alert("消费积分不正确");
             return false;
         }
-        var balanceChange = -parseFloat(consumeBalanceElement.value);
-        var quantityChange = -parseInt(consumeQuantityElement.value);
-        var scoreChange = -parseInt(consumeScoreElement.value);
+        var balanceChange = -parseFloat(consumeBalance);
+        var quantityChange = -parseInt(consumeQuantity);
+        var scoreChange = -parseInt(consumeScore);
         if (-balanceChange > customer['balance']) {
             alert("消费金额不正确");
             return false;
@@ -498,8 +507,8 @@
         sendApiRequest("/consume",
                        {
                            "customerId": customerId, "updateTime": updateTime,
-                            "balanceChange": balanceChange, "quantityChange": quantityChange,
-                             "scoreChange": scoreChange, "comments": comments
+                           "balanceChange": balanceChange, "quantityChange": quantityChange,
+                           "scoreChange": scoreChange, "comments": comments
                        },
                        function(result) {
                            window.location.reload();

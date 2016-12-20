@@ -1,13 +1,13 @@
 function isValidInteger(rawValue) {
-    return /^-?[0-9]*$/.test(rawValue);
+    return /^-?[0-9]+$/.test(rawValue);
 }
 
 function isValidFloat(rawValue) {
-    return /^-?[0-9]*(\.[0-9]+)?$/.test(rawValue);
+    return /^-?[0-9]+(\.[0-9]+)?$/.test(rawValue);
 }
 
 function isValidCard(rawValue) {
-    return /^-?[0-9a-zA-Z]+?$/.test(rawValue);
+    return /^-?[0-9a-z]+?$/.test(rawValue);
 }
 
 function isValidIdentification(rawValue) {
@@ -15,7 +15,11 @@ function isValidIdentification(rawValue) {
 }
 
 function isValidCellphone(rawValue) {
-    return /^[0-9]{11}?$/.test(rawValue);
+    return /^(\+86)([0-9]{11})$/.test(rawValue);
+}
+
+function isValidCaptcha(rawValue) {
+    return /^[0-9]{6}$/.test(rawValue);
 }
 
 function sendApiRequest(url, parameters, callback) {

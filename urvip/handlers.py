@@ -14,7 +14,7 @@ class LoginHandler(PageHandler):
         return self.render('urvip/login.html')
 
     def post(self, *args, **kwargs):
-        cellphone = '+86{0}'.format(self.get_str_argument('cellphone'))
+        cellphone = self.get_str_argument('cellphone')
         captcha = self.get_str_argument('captcha')
         try:
             admin = Admin.auth_by_captcha(self.db, cellphone, captcha)
@@ -31,7 +31,7 @@ class SendCaptchaHandler(ApiHandler):
     """发送验证码
     """
     def post(self, *args, **kwargs):
-        cellphone = '+86{0}'.format(self.get_str_argument('cellphone'))
+        cellphone = self.get_str_argument('cellphone')
         Admin.send_auth_captcha(self.db, cellphone)
         return self.api_succeed()
 
@@ -76,8 +76,8 @@ class CustomersHandler(PageHandler):
     def get(self, *args, **kwargs):
         page_num = self.get_int_argument('page')
         card = self.get_str_argument('card')
-        cellphone = '+86{0}'.format(self.get_str_argument('cellphone'))
-        if len(card) == 0 and len(cellphone) == 3:
+        cellphone = self.get_str_argument('cellphone')
+        if not card and not cellphone:
             customers, page_num, page_count = Customer.list_by_page(self.db, self.current_user.id, page_num)
         else:
             customer = Customer.get(self.db, self.current_user.sellerId, card=card, cellphone=cellphone)
@@ -97,7 +97,7 @@ class AddCustomerHandler(ApiHandler):
         identification = self.get_str_argument('identification')
         name = self.get_str_argument('name')
         gender = self.get_int_argument('gender')
-        cellphone = '+86{0}'.format(self.get_str_argument('cellphone'))
+        cellphone = self.get_str_argument('cellphone')
         Customer.add(self.db, self.current_user.id, identification, name, gender, cellphone)
         return self.api_succeed()
 
@@ -148,7 +148,7 @@ class CustomerDetailHandler(PageHandler):
     def get(self, *args, **kwargs):
         id = self.get_int_argument('id')
         card = self.get_str_argument('card')
-        cellphone = '+86{0}'.format(self.get_str_argument('cellphone'))
+        cellphone = self.get_str_argument('cellphone')
         customer = Customer.get(self.db, self.current_user.sellerId, id=id, card=card, cellphone=cellphone)
         return self.render('urvip/customer_detail.html',
                            customer=customer, qr_code=pyqrcode.create(customer.card).text(),

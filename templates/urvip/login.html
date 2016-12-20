@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
     <title>登录</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/css/login.css">
 </head>
@@ -33,7 +33,7 @@ window.onload = function() {
         loginElem = document.getElementById("login"),
         resendCaptchaElem = document.getElementById("resendCaptcha"),
         loginValid = function() {
-            if (/^1[34578]\d{9}$/.test(cellphoneElem.value) && /^\d{6}$/.test(captchaElem.value)) {
+            if (isValidCellphone(cellphoneElem.value) && isValidCaptcha(captchaElem.value)) {
                 loginElem.disabled = false;
             } else {
                 loginElem.disabled = true;
@@ -59,9 +59,13 @@ window.onload = function() {
             return false;
         }
         var cellphone = cellphoneElem.value;
-        if (!/^1[34578]\d{9}$/.test(cellphone)) {
+        if (!isValidCellphone(cellphone)) {
             alert("请输入正确的手机号");
             return false;
+        }
+        if (!cellphone.startsWith("+")) {
+            cellphone = "+86" + cellphone;
+            cellphoneElem.value = cellphone;
         }
         countDown(60);
         sendApiRequest("/sendCaptcha", {"cellphone": cellphone}, function(result) {});

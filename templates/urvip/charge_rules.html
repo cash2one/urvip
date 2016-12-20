@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
     <title>充值规则</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
 </head>
@@ -161,28 +161,20 @@
     }
     function confirmEdit() {
         var name = editNameElement.value;
-        var payout = editPayoutElement.value;
-        var balanceChange = editBalanceChangeElement.value;
-        var quantityChange = editQuantityChangeElement.value;
-        var scoreChange = editScoreChangeElement.value;
+        var payout = editPayoutElement.value ? editPayoutElement.value : "0";
+        var balanceChange = editBalanceChangeElement.value ? editBalanceChangeElement.value : "0";
+        var quantityChange = editQuantityChangeElement.value ? editQuantityChangeElement.value : "0";
+        var scoreChange = editScoreChangeElement.value ? editScoreChangeElement.value : "0";
         if (!name) {
-            alert("请填写规则名称");
-            return false;
-        }
-        if (!payout) {
-            alert("请填写支付金额");
+            window.alert("请填写规则名称");
             return false;
         }
         if (!isValidFloat(payout)) {
-            alert("支付金额不正确");
-            return false;
-        }
-        if (!balanceChange && !quantityChange && !scoreChange) {
-            alert("请填写得到金额/次数/积分");
+            window.alert("支付金额不正确");
             return false;
         }
         if (!isValidFloat(balanceChange) || !isValidInteger(quantityChange) || !isValidInteger(scoreChange)) {
-            alert("得到金额/次数/积分不正确");
+            window.alert("得到金额/次数/积分不正确");
             return false;
         }
         sendApiRequest("/addChargeRule",
