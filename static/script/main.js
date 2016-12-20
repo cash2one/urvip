@@ -15,7 +15,7 @@ function isValidIdentification(rawValue) {
 }
 
 function isValidCellphone(rawValue) {
-    return /^(\+86)([0-9]{11})$/.test(rawValue);
+    return /^(\+86)?([0-9]{11})$/.test(rawValue);
 }
 
 function isValidCaptcha(rawValue) {
