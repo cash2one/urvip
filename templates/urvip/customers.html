@@ -365,7 +365,7 @@
         reader.onload = function (event) {
             var image = new Image();
             image.onload = function() {
-                var scale = 1; // Math.min(300 / Math.min(this.width, this.height), 1);
+                var scale = Math.min(600 / Math.min(this.width, this.height), 1);
                 var width = this.width * scale;
                 var height = this.height * scale;
                 var canvas = document.getElementById("qr-canvas");
