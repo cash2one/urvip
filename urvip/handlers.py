@@ -77,10 +77,10 @@ class CustomersHandler(PageHandler):
         page_num = self.get_int_argument('page')
         card = self.get_str_argument('card')
         cellphone = '+86{0}'.format(self.get_str_argument('cellphone'))
-        if not card and not cellphone:
+        if len(card) == 0 and len(cellphone) == 3:
             customers, page_num, page_count = Customer.list_by_page(self.db, self.current_user.id, page_num)
         else:
-            customer = Customer.get(self.db, self.current_user.sellerId, id=id, card=card, cellphone=cellphone)
+            customer = Customer.get(self.db, self.current_user.sellerId, card=card, cellphone=cellphone)
             customers, page_num, page_count = [customer], 0, 1
         charge_rules = ChargeRule.list(self.db, self.current_user.sellerId)
         return self.render('urvip/customers.html',
