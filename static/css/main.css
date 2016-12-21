@@ -24,6 +24,7 @@ table>thead>tr>th{
 .table-box{
     overflow: auto;
     position:relative;
+    margin-top:10px;
 }
 .table-responsive{
     /* position:relative; */

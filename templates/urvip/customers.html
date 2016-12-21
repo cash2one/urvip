@@ -11,14 +11,14 @@
 <div class="container-fluid container">
     <header>
         <h5>
-            <p>您好,<span id="userName"></span></p>
+            <p>您好,<span id="userName">{{ user_name }}</span></p>
             <button onclick="logout();" class="btn btn-danger btn-xs pull-right">退出</button>
         </h5>
     </header>
     
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation"><a href="/chargeRules">充值规则</a></li>
         <li role="presentation" class="active"><a href="/customers">会员</a></li>
+        <li role="presentation"><a href="/chargeRules">充值规则</a></li>
         <li role="presentation"><a href="/sellerTransactions">交易记录</a></li>
     </ul>
     <div class="row">
@@ -280,9 +280,7 @@
 <script type="text/javascript" src="/static/script/main.js"></script>
 <script type="text/javascript" src="/static/script/lazarsoft.jsqrcode.js"></script>
 <script type="text/javascript">
-    var userNameElement = document.getElementById('userName');
-        userNameElement.innerHTML = '{{ user_name }}',
-        genders = {"1": "男", "2": "女"},
+    var genders = {"1": "男", "2": "女"},
         customer = null;
     /*
      * 创建会员
