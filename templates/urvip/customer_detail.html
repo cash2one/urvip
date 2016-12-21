@@ -18,7 +18,7 @@
         <div class="text-line"><label>性别</label><span>{{ {"1": "男", "2": "女"}[str(customer.gender)] }}</span></div>
         <div class="text-line"><label>身份证号</label><span>{{ customer.identification }}</span></div>
         <div class="text-line"><label>手机号</label><span>{{ customer.cellphone }}</span>
-            <a href="downloadCustomerDetail?id={{ customer.id }}" class="btn btn-primary btn-sm pull-right">下载</a>
+            <a href="downloadCustomerDetail?id={{ customer.id }}" class="btn btn-primary btn-sm pull-right">下载CSV</a>
         </div>
     </div>
 
