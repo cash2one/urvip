@@ -31,7 +31,7 @@
             <li class="fix-head">姓名</li>
             {% for i in range(len(customers)) %}
             {% set customer = customers[i] %}
-            <li class="fix-item">{{customer.name}}</li>
+            <li class="fix-item text-left">{{customer.name}}</li>
             {% end %}
         </ul>
         <div class="table-responsive">
@@ -52,7 +52,7 @@
                 {% for i in range(len(customers)) %}
                 {% set customer = customers[i] %}
                 <tr>
-                    <td><span>{{ customer.name }}</span></td>
+                    <td><span class="text-left">{{ customer.name }}</span></td>
                     <td>{{ {"1": "男", "2": "女"}[str(customer.gender)] }}</td>
                     <td>{{ customer.identification }}&nbsp;</td>
                     <td>{{ customer.cellphone }}</td>
@@ -94,13 +94,13 @@
         <div id="edit" class="modal modal-lg">
             <div class="form-horizontal" role="form">
                 <div class="form-group">
-                    <label for="editName" class="col-sm-2 col-xs-4">姓名</label>
+                    <label for="editName" class="col-sm-2 col-xs-4 text-left">姓名</label>
                     <div class="col-sm-10 col-xs-8">
                         <input type="text" class="form-control" id="editName" placeholder="请输入姓名">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="editName" class="col-sm-2 col-xs-4">性别</label>
+                    <label for="editName" class="col-sm-2 col-xs-4 text-left">性别</label>
                     <div class="col-sm-10 col-xs-8">
                         <select id="editGender" class="form-control">
                             <option value="1">男</option>
@@ -109,13 +109,13 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="editIdentification" class="col-sm-2 col-xs-4">身份证</label>
+                    <label for="editIdentification" class="col-sm-2 col-xs-4 text-left">身份证</label>
                     <div class="col-sm-10 col-xs-8">
                         <input type="text" class="form-control" id="editIdentification" placeholder="请输入身份证号码">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="editCellphone" class="col-sm-2 col-xs-4">手机</label>
+                    <label for="editCellphone" class="col-sm-2 col-xs-4 text-left">手机</label>
                     <div class="col-sm-10 col-xs-8">
                         <input type="text" class="form-control" id="editCellphone" placeholder="请输入手机号码">
                     </div>
@@ -148,23 +148,23 @@
         <div id="charge" class="modal modal-lg">
             <div class="form-horizontal" role="form">
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">姓名</label>
+                    <label class="col-sm-2 col-xs-4 text-left">姓名</label>
                     <p id="chargeName" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">性别</label>
+                    <label class="col-sm-2 col-xs-4 text-left">性别</label>
                     <p id="chargeGender" class="form-control-static "></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">身份证</label>
+                    <label class="col-sm-2 col-xs-4 text-left">身份证</label>
                     <p id="chargeIdentification" class="form-control-static "></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">手机</label>
+                    <label class="col-sm-2 col-xs-4 text-left">手机</label>
                     <p id="chargeCellphone" class="form-control-static "></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">充值</label>
+                    <label class="col-sm-2 col-xs-4 text-left">充值</label>
                     <div class="col-sm-10 col-xs-8">
                         <select id="chargeRule" class="form-control">
                             {% for i in range(len(charge_rules)) %}
@@ -175,7 +175,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">备注</label>
+                    <label class="col-sm-2 col-xs-4 text-left">备注</label>
                     <div class="col-sm-10 col-xs-8">
                         <input id="chargeComments" type="text" class="form-control" placeholder="请输入备注"/>
                     </div>
@@ -190,41 +190,41 @@
         <div id="consume" class="modal modal-lg">
             <div class="form-horizontal" role="form">
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">姓名</label>
+                    <label class="col-sm-2 col-xs-4 text-left">姓名</label>
                     <p id="consumeName" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">性别</label>
+                    <label class="col-sm-2 col-xs-4 text-left">性别</label>
                     <p id="consumeGender" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">身份证</label>
+                    <label class="col-sm-2 col-xs-4 text-left">身份证</label>
                     <p id="consumeIdentification" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">手机</label>
+                    <label class="col-sm-2 col-xs-4 text-left">手机</label>
                     <p id="consumeCellphone" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">消费金额</label>
+                    <label class="col-sm-2 col-xs-4 text-left">消费金额</label>
                     <div class="col-sm-10 col-xs-8">
                         <input id="consumeBalance" type="text" class="form-control"/>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">消费次数</label>
+                    <label class="col-sm-2 col-xs-4 text-left">消费次数</label>
                     <div class="col-sm-10 col-xs-8">
                         <input id="consumeQuantity" type="text" class="form-control"/>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">消费积分</label>
+                    <label class="col-sm-2 col-xs-4 text-left">消费积分</label>
                     <div class="col-sm-10 col-xs-8">
                         <input id="consumeScore" type="text" class="form-control"/>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">备注</label>
+                    <label class="col-sm-2 col-xs-4 text-left">备注</label>
                     <div class="col-sm-10 col-xs-8">
                         <input id="consumeComments" type="text" class="form-control" placeholder="请输入备注"/>
                     </div>
@@ -239,31 +239,31 @@
         <div id="delete" class="modal modal-lg">
             <div class="form-horizontal" role="form">
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">姓名</label>
+                    <label class="col-sm-2 col-xs-4 text-left">姓名</label>
                     <p id="deleteName" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">性别</label>
+                    <label class="col-sm-2 col-xs-4 text-left">性别</label>
                     <p id="deleteGender" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">身份证</label>
+                    <label class="col-sm-2 col-xs-4 text-left">身份证</label>
                     <p id="deleteIdentification" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">手机</label>
+                    <label class="col-sm-2 col-xs-4 text-left">手机</label>
                     <p id="deleteCellphone" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">剩余金额</label>
+                    <label class="col-sm-2 col-xs-4 text-left">剩余金额</label>
                     <p id="deleteBalance" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">剩余次数</label>
+                    <label class="col-sm-2 col-xs-4 text-left">剩余次数</label>
                     <p id="deleteQuantity" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-xs-4">可用积分</label>
+                    <label class="col-sm-2 col-xs-4 text-left">可用积分</label>
                     <p id="deleteScore" class="form-control-static"></p>
                 </div>
             </div>
