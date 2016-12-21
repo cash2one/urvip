@@ -31,7 +31,7 @@
             <li class="fix-head">姓名</li>
             {% for i in range(len(customers)) %}
             {% set customer = customers[i] %}
-            <li class="fix-item text-left">{{customer.name}}</li>
+            <li class="fix-item">{{customer.name}}</li>
             {% end %}
         </ul>
         <div class="table-responsive">
@@ -52,7 +52,7 @@
                 {% for i in range(len(customers)) %}
                 {% set customer = customers[i] %}
                 <tr>
-                    <td><span class="text-left">{{ customer.name }}</span></td>
+                    <td><span>{{ customer.name }}</span></td>
                     <td>{{ {"1": "男", "2": "女"}[str(customer.gender)] }}</td>
                     <td>{{ customer.identification }}&nbsp;</td>
                     <td>{{ customer.cellphone }}</td>

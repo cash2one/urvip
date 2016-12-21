@@ -31,7 +31,7 @@
             <li class="fix-head">名称</li>
             {% for i in range(len(charge_rules)) %}
             {% set charge_rule = charge_rules[i] %}
-            <li class="fix-item text-left">{{ charge_rule.name }}</li>
+            <li class="fix-item">{{ charge_rule.name }}</li>
             {% end %}
         </ul>
         <div class="table-responsive">
@@ -50,7 +50,7 @@
                 {% for i in range(len(charge_rules)) %}
                 {% set charge_rule = charge_rules[i] %}
                 <tr>
-                    <td><span class="text-left">{{ charge_rule.name }}</span></td>
+                    <td><span>{{ charge_rule.name }}</span></td>
                     <td>{{ charge_rule.payout }}</td>
                     <td>{{ charge_rule.balanceChange }}</td>
                     <td>{{ charge_rule.quantityChange }}</td>
