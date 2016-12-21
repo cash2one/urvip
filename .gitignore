@@ -1,8 +1,8 @@
 .DS_Store
 .idea
+sftp-config.json
 
 __pycache__/
 *.py[cod]
 
 config.py
-sftp-config.json
