@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+{% from datetime import datetime %}
+<html lang="zh_CN">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+    <title>记录</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+
+<p>您好,<span id="userName">{{ user_name }}</span></p>
+<ul class="nav nav-tabs" role="tablist">
+    <li role="presentation"><a href="/chargeRules">充值规则</a></li>
+    <li role="presentation"><a href="/customers">会员</a></li>
+    <li role="presentation" class="active"><a href="/sellerTransactions">交易记录</a></li>
+</ul>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+        <th>时间</th>
+        <th>会员</th>
+        <th>性别</th>
+        <th>身份证</th>
+        <th>手机</th>
+        <th>类别</th>
+        <th>余额变动</th>
+        <th>次数变动</th>
+        <th>积分变动</th>
+        <th>剩余金额</th>
+        <th>剩余次数</th>
+        <th>剩余积分</th>
+        <th>备注</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for i in range(len(transactions)) %}
+    {% set transaction = transactions[i] %}
+    <tr>
+        <td>{{ datetime.strftime(transaction.createTime, '%Y-%m-%d %H:%M') }}</td>
+        {% set customer = transaction.customer %}
+        <td>{{ customer.name }}</td>
+        <td>{{ {'1': '男', '2': '女'}[str(customer.gender)] }}</td>
+        <td>{{ customer.identification }}</td>
+        <td>{{ customer.cellphone }}</td>
+        <td>{{ {'1': '充值', '5': '消费'}[str(transaction.kind)] }}</td>
+        <td>
+            {% if transaction.balanceChange > 0 %}
+                <font color="#00aa00">+{{ transaction.balanceChange }}</font>
+            {% elif transaction.balanceChange < 0 %}
+                <font color="#d50000">{{ transaction.balanceChange }}</font>
+            {% else %}
+                &nbsp;
+            {% end %}
+        </td>
+        <td>
+            {% if transaction.quantityChange > 0 %}
+                <font color="#00aa00">+{{ transaction.quantityChange }}</font>
+            {% elif transaction.quantityChange < 0 %}
+                <font color="#d50000">{{ transaction.quantityChange }}</font>
+            {% else %}
+                &nbsp;
+            {% end %}
+        </td>
+        <td>
+            {% if transaction.scoreChange > 0 %}
+                <font color="#00aa00">+{{ transaction.scoreChange }}</font>
+            {% elif transaction.scoreChange < 0 %}
+                <font color="#d50000">{{ transaction.scoreChange }}</font>
+            {% else %}
+                &nbsp;
+            {% end %}
+        </td>
+        <td>{{ transaction.balance }}</td>
+        <td>{{ transaction.quantity }}</td>
+        <td>{{ transaction.score }}</td>
+        <td>{{ transaction.comments }}&nbsp;</td>
+    </tr>
+    {% end %}
+    </tbody>
+</table>
+
+<div class="paging text-center">
+    {% if page_num > 0 %}
+        <span>
+            <a href="/sellerTransactions?page={{ page_num - 1 }}" dis>前一页</a>
+        </span>
+    {% end %}
+
+        <span>
+            第{{ page_num + 1 }}/{{ page_count }}页
+        </span>
+
+    {% if page_num < page_count - 1 %}
+        <span>
+            <a href="/sellerTransactions?page={{ page_num + 1 }}">后一页</a>
+        </span>
+    {% end %}
+</div>
+</body>
+</html>

@@ -54,6 +54,18 @@ class Seller(BaseModel):
         db.merge(seller)
         db.commit()
 
+    @staticmethod
+    def list_transactions_by_page(db, seller_id, page_num, page_size=10):
+        """商户所有会员的充值和消费记录
+        """
+        cursor = db.query(Transaction).join(Transaction.customer)\
+                   .filter(Customer.sellerId == seller_id)\
+                   .order_by(Transaction.createTime.desc())
+        total_count = cursor.count()
+        page_num, page_count = paginate(total_count, page_num, page_size)
+        transactions = cursor.offset(page_num * page_size).limit(page_size)
+        return [t for t in transactions], page_num, page_count
+
 
 class Admin(BaseModel):
     """商户管理员
@@ -304,6 +316,10 @@ class Customer(BaseModel):
                 balance_change=0, quantity_change=0, score_change=0, comments=None):
         """会员消费
         """
+        if balance_change > 0 or quantity_change > 0 or score_change > 0:
+            raise Exception
+        if balance_change == 0 and quantity_change == 0 and score_change == 0:
+            raise Exception
         now = datetime.now()
         admin = db.query(Admin).filter(Admin.id == admin_id, Admin.status == 1).one()
         customer = db.query(Customer).filter(Customer.id == customer_id,

@@ -4,7 +4,7 @@ import pyqrcode
 
 from core.decorators import require_login
 from core.handlers import PageHandler, ApiHandler
-from urvip.models import Admin, ChargeRule, Customer
+from urvip.models import Seller, Admin, ChargeRule, Customer
 
 
 class LoginHandler(PageHandler):
@@ -178,6 +178,19 @@ class DownloadCustomerDetailHandler(PageHandler):
         return self.finish()
 
 
+class SellerTransactionsHandler(PageHandler):
+    """商户所有会员的充值和消费记录
+    """
+    @require_login
+    def get(self, *args, **kwargs):
+        page_num = self.get_int_argument('page')
+        transactions, page_num, page_count = Seller.list_transactions_by_page(self.db, self.current_user.sellerId,
+                                                                              page_num)
+        return self.render('urvip/seller_transactions.html',
+                           user_name=self.current_user.cellphone,
+                           transactions=transactions, page_num=page_num, page_count=page_count)
+
+
 __handlers__ = [
     (r'^/login$', LoginHandler),
     (r'^/sendCaptcha$', SendCaptchaHandler),
@@ -190,5 +203,6 @@ __handlers__ = [
     (r'^/charge$', ChargeHandler),
     (r'^/consume$', ConsumeHandler),
     (r'^/customerDetail$', CustomerDetailHandler),
-    (r'^/downloadCustomerDetail$', DownloadCustomerDetailHandler)
+    (r'^/downloadCustomerDetail$', DownloadCustomerDetailHandler),
+    (r'^/sellerTransactions$', SellerTransactionsHandler)
 ]

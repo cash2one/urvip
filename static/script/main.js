@@ -40,8 +40,6 @@ function sendApiRequest(url, parameters, callback) {
 }
 
 function logout() {
-    if (navigator.userAgent.indexOf("Safari") >= 0 || confirm("确认退出么？")) {
-        document.cookie = "sessionId='';path=/;expires=" + (new Date()).toGMTString();
-        window.location.reload();
-    }
+    document.cookie = "sessionId='';path=/;expires=" + (new Date()).toGMTString();
+    window.location.reload();
 }
