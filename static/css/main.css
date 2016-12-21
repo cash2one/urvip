@@ -3,7 +3,7 @@ label{
     colore:#555;
     font-weight: normal;
     font-family: Microsoft Yahei;
-    padding-right: 0;
+    padding-right: 0!important;
     margin-top: 10px;
 }
 a,a:hover,a:focus{
@@ -163,6 +163,7 @@ header h5 p{
     margin: 0;
     margin-left:90px;
     line-height: 28px;
+    height:28px;
     position:relative;
 }
 .user-info label{
@@ -178,6 +179,18 @@ header h5 p{
     font-size: 16px;
 }
 /* 二维码 */
+#qr-btn{
+    display: block;
+    width:90%;
+    margin: auto;
+    height:34px;
+    line-height: 34px;
+    text-align: center;
+    color: #fff;
+    background-color: #5bc0de;
+    border-color: #46b8da;
+    border-radius: 6px;
+}
 #qr-input{
     height:1px;
     visibility: hidden;

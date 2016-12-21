@@ -5,3 +5,4 @@ __pycache__/
 *.py[cod]
 
 config.py
+sftp-config.json
