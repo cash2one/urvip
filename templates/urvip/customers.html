@@ -207,6 +207,9 @@
                     <p id="consumeCellphone" class="form-control-static"></p>
                 </div>
                 <div class="form-group">
+                    <a id="consumeSendCaptcha" href="javascript:;" onclick="sendConsumeCaptcha();" class="col-sm-12 col-xs-12 text-right">发送验证码</a>
+                </div>
+                <div class="form-group">
                     <label class="col-sm-4 col-xs-4 text-left">消费金额</label>
                     <div class="col-sm-8 col-xs-8">
                         <input id="consumeBalance" type="text" class="form-control"/>
@@ -228,6 +231,12 @@
                     <label class="col-sm-4 col-xs-4 text-left">备注</label>
                     <div class="col-sm-8 col-xs-8">
                         <input id="consumeComments" type="text" class="form-control" placeholder="请输入备注"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 col-xs-4 text-left">验证码</label>
+                    <div class="col-sm-8 col-xs-8">
+                        <input id="consumeCaptcha" type="text" class="form-control" placeholder="请输入验证码"/>
                     </div>
                 </div>
             </div>
@@ -437,12 +446,14 @@
     var consumeElement = document.getElementById('consume'),
         consumeIdentificationElement = document.getElementById('consumeIdentification'),
         consumeCellphoneElement = document.getElementById('consumeCellphone'),
+        consumeSendCaptchaElement = document.getElementById('consumeSendCaptcha'),
         consumeNameElement = document.getElementById('consumeName'),
         consumeGenderElement = document.getElementById('consumeGender'),
         consumeBalanceElement = document.getElementById('consumeBalance'),
         consumeQuantityElement = document.getElementById('consumeQuantity'),
         consumeScoreElement = document.getElementById('consumeScore'),
-        consumeCommentsElement = document.getElementById('consumeComments');
+        consumeCommentsElement = document.getElementById('consumeComments'),
+        consumeCaptchaElement = document.getElementById('consumeCaptcha');
     function showConsume(consumeCustomer) {
         customer = consumeCustomer;
         consumeIdentificationElement.innerHTML = customer['identification'];
@@ -456,7 +467,36 @@
         consumeScoreElement.value = '';
         consumeScoreElement.placeholder = "可用积分:" + customer['score'];
         consumeCommentsElement.value = '';
+        consumeCaptchaElement.value = '';
         showModal(consumeElement);
+    }
+    function countDown(seconds) {
+        var count = setInterval(function() {
+            if (seconds == 0) {
+                clearInterval(count);
+                consumeSendCaptchaElement.innerHTML = "发送验证码";
+                consumeSendCaptchaElement.disabled = false;
+            } else {
+                consumeSendCaptchaElement.innerHTML = "重新发送(" + seconds + ")";
+                consumeSendCaptchaElement.disabled = true;
+                seconds -= 1;
+            }
+        }, 1000);
+    }
+    function sendConsumeCaptcha() {
+        if (consumeSendCaptchaElement.disabled) {
+            return false;
+        }
+        var customerId = customer["id"];
+        var cellphone = customer["cellphone"];
+        var updateTime = customer["updateTime"];
+        countDown(60);
+        sendApiRequest("/sendConsumeCaptcha",
+                       {
+                           "customerId": customerId, "cellphone": cellphone, "updateTime": updateTime
+                       },
+                       function(result) {
+                       });
     }
     function confirmConsume() {
         var customerId = customer["id"];
@@ -496,11 +536,20 @@
             return false;
         }
         var comments = consumeCommentsElement.value;
+        var consumeCaptcha = consumeCaptchaElement.value;
+        if (consumeCaptcha.length == 0) {
+            window.alert("请输入验证码");
+            return false;
+        }
+        if (consumeCaptcha.length != 6) {
+            window.alert("验证码不正确");
+            return false;
+        }
         sendApiRequest("/consume",
                        {
                            "customerId": customerId, "updateTime": updateTime,
                            "balanceChange": balanceChange, "quantityChange": quantityChange,
-                           "scoreChange": scoreChange, "comments": comments
+                           "scoreChange": scoreChange, "comments": comments, "captcha": consumeCaptcha
                        },
                        function(result) {
                            window.location.reload();

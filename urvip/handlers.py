@@ -55,7 +55,7 @@ class AddChargeRuleHandler(ApiHandler):
         balance_change = self.get_float_argument('balanceChange')
         quantity_change = self.get_float_argument('quantityChange')
         score_change = self.get_float_argument('scoreChange')
-        ChargeRule.add(self.db, self.current_user.id, name, payout, balance_change, quantity_change, score_change)
+        ChargeRule.add(self.db, self.current_user.sellerId, name, payout, balance_change, quantity_change, score_change)
         return self.api_succeed()
 
 
@@ -65,7 +65,7 @@ class DeleteChargeRuleHandler(ApiHandler):
     @require_login
     def post(self, *args, **kwargs):
         id = self.get_int_argument('id')
-        ChargeRule.delete(self.db, self.current_user.id, id)
+        ChargeRule.delete(self.db, self.current_user.sellerId, id)
         return self.api_succeed()
 
 
@@ -78,7 +78,7 @@ class CustomersHandler(PageHandler):
         card = self.get_str_argument('card')
         cellphone = self.get_str_argument('cellphone')
         if not card and not cellphone:
-            customers, page_num, page_count = Customer.list_by_page(self.db, self.current_user.id, page_num)
+            customers, page_num, page_count = Customer.list_by_page(self.db, self.current_user.sellerId, page_num)
         else:
             customer = Customer.get(self.db, self.current_user.sellerId, card=card, cellphone=cellphone)
             customers, page_num, page_count = [customer] if customer else [], 0, 1
@@ -98,7 +98,7 @@ class AddCustomerHandler(ApiHandler):
         name = self.get_str_argument('name')
         gender = self.get_int_argument('gender')
         cellphone = self.get_str_argument('cellphone')
-        Customer.add(self.db, self.current_user.id, identification, name, gender, cellphone)
+        Customer.add(self.db, self.current_user.sellerId, identification, name, gender, cellphone)
         return self.api_succeed()
 
 
@@ -108,7 +108,7 @@ class DeleteCustomerHandler(ApiHandler):
     @require_login
     def post(self, *args, **kwargs):
         id = self.get_int_argument('id')
-        Customer.delete(self.db, self.current_user.id, id)
+        Customer.delete(self.db, self.current_user.sellerId, id)
         return self.api_succeed()
 
 
@@ -121,7 +121,19 @@ class ChargeHandler(ApiHandler):
         old_update_time = self.get_float_argument('updateTime')
         charge_rule_id = self.get_int_argument('chargeRuleId')
         comments = self.get_str_argument('comments')
-        Customer.charge(self.db, self.current_user.id, customer_id, old_update_time, charge_rule_id, comments)
+        Customer.charge(self.db, self.current_user.sellerId, customer_id, old_update_time, charge_rule_id, comments)
+        return self.api_succeed()
+
+
+class SendConsumeCaptchaHandler(ApiHandler):
+    """发送消费验证码
+    """
+    @require_login
+    def post(self, *args, **kwargs):
+        customer_id = self.get_int_argument('customerId')
+        cellphone = self.get_str_argument('cellphone')
+        old_update_time = self.get_float_argument('updateTime')
+        Customer.send_consume_captcha(self.db, self.current_user.sellerId, customer_id, cellphone, old_update_time)
         return self.api_succeed()
 
 
@@ -136,8 +148,9 @@ class ConsumeHandler(ApiHandler):
         quantity_change = self.get_int_argument('quantityChange')
         score_change = self.get_int_argument('scoreChange')
         comments = self.get_str_argument('comments')
-        Customer.consume(self.db, self.current_user.id, customer_id, old_update_time,
-                         balance_change, quantity_change, score_change, comments)
+        captcha = self.get_str_argument('captcha')
+        Customer.consume(self.db, self.current_user.sellerId, customer_id, old_update_time,
+                         balance_change, quantity_change, score_change, comments, captcha)
         return self.api_succeed()
 
 
@@ -201,6 +214,7 @@ __handlers__ = [
     (r'^/addCustomer$', AddCustomerHandler),
     (r'^/deleteCustomer$', DeleteCustomerHandler),
     (r'^/charge$', ChargeHandler),
+    (r'^/sendConsumeCaptcha', SendConsumeCaptchaHandler),
     (r'^/consume$', ConsumeHandler),
     (r'^/customerDetail$', CustomerDetailHandler),
     (r'^/downloadCustomerDetail$', DownloadCustomerDetailHandler),

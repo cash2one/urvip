@@ -146,12 +146,11 @@ class ChargeRule(BaseModel):
         return [r for r in charge_rules]
 
     @staticmethod
-    def add(db, admin_id, name, payout, balance_change, quantity_change, score_change):
+    def add(db, seller_id, name, payout, balance_change, quantity_change, score_change):
         """创建充值规则
         """
         now = datetime.now()
-        admin = db.query(Admin).filter(Admin.id == admin_id, Admin.status == 1).one()
-        charge_rule = ChargeRule(sellerId=admin.sellerId, name=name, payout=payout, balanceChange=balance_change,
+        charge_rule = ChargeRule(sellerId=seller_id, name=name, payout=payout, balanceChange=balance_change,
                                  quantityChange=quantity_change, scoreChange=score_change, status=1,
                                  createTime=now, updateTime=now)
         db.add(charge_rule)
@@ -159,13 +158,12 @@ class ChargeRule(BaseModel):
         return charge_rule
 
     @staticmethod
-    def delete(db, admin_id, charge_rule_id):
+    def delete(db, seller_id, charge_rule_id):
         """删除充值规则
         """
         now = datetime.now()
-        admin = db.query(Admin).filter(Admin.id == admin_id, Admin.status == 1).one()
         charge_rule = db.query(ChargeRule).filter(ChargeRule.id == charge_rule_id,
-                                                  ChargeRule.sellerId == admin.sellerId).one()
+                                                  ChargeRule.sellerId == seller_id).one()
         charge_rule.status = 9
         charge_rule.updateTime = now
         db.merge(charge_rule)
@@ -211,6 +209,8 @@ class Customer(BaseModel):
     quantity = Column('quantity', Integer)
     score = Column('score', Integer)
     level = Column('level', Integer)
+    cellphoneConsumeCaptcha = Column('cellphone_consume_captcha', String(6))
+    cellphoneConsumeCaptchaExpireTime = Column('cellphone_consume_captcha_expire_time', DateTime)
     transactions = relationship('Transaction', order_by='Transaction.createTime.desc()',
                                 back_populates='customer', lazy='dynamic')
     status = Column('status', Integer)
@@ -237,12 +237,11 @@ class Customer(BaseModel):
             raise Exception
 
     @staticmethod
-    def list_by_page(db, admin_id, page_num, page_size=10):
+    def list_by_page(db, seller_id, page_num, page_size=10):
         """会员分页列表
         """
-        admin = db.query(Admin).filter(Admin.id == admin_id, Admin.status == 1).one()
         cursor = db.query(Customer)\
-                   .filter(Customer.sellerId == admin.sellerId, Customer.status == 1)\
+                   .filter(Customer.sellerId == seller_id, Customer.status == 1)\
                    .order_by(Customer.updateTime.desc())
         total_count = cursor.count()
         page_num, page_count = paginate(total_count, page_num, page_size)
@@ -250,12 +249,11 @@ class Customer(BaseModel):
         return [c for c in customers], page_num, page_count
 
     @staticmethod
-    def add(db, admin_id, identification, name, gender, cellphone):
+    def add(db, seller_id, identification, name, gender, cellphone):
         """添加会员
         """
         now = datetime.now()
-        admin = db.query(Admin).filter(Admin.id == admin_id, Admin.status == 1).one()
-        customer = Customer(sellerId=admin.sellerId, identification=identification, name=name, gender=gender,
+        customer = Customer(sellerId=seller_id, identification=identification, name=name, gender=gender,
                             cellphone=cellphone, weChatOpenId='', card=str(uuid4()).replace('-', ''),
                             address='', zipCode='', balance=0, quantity=0, score=0, level=1, status=1,
                             createTime=now, updateTime=now)
@@ -264,30 +262,28 @@ class Customer(BaseModel):
         return customer
 
     @staticmethod
-    def delete(db, admin_id, customer_id):
+    def delete(db, seller_id, customer_id):
         """删除会员
         """
         now = datetime.now()
-        admin = db.query(Admin).filter(Admin.id == admin_id, Admin.status == 1).one()
         customer = db.query(Customer).filter(Customer.id == customer_id,
-                                             Customer.sellerId == admin.sellerId).one()
+                                             Customer.sellerId == seller_id).one()
         customer.status = 9
         customer.updateTime = now
         db.merge(customer)
         db.commit()
 
     @staticmethod
-    def charge(db, admin_id, customer_id, old_update_time, charge_rule_id, comments):
+    def charge(db, seller_id, customer_id, old_update_time, charge_rule_id, comments):
         """会员充值
         """
         now = datetime.now()
-        admin = db.query(Admin).filter(Admin.id == admin_id, Admin.status == 1).one()
         customer = db.query(Customer).filter(Customer.id == customer_id,
                                              Customer.updateTime == datetime.fromtimestamp(old_update_time),
-                                             Customer.sellerId == admin.sellerId,
+                                             Customer.sellerId == seller_id,
                                              Customer.status == 1).one()
         charge_rule = db.query(ChargeRule).filter(ChargeRule.id == charge_rule_id,
-                                                  ChargeRule.sellerId == admin.sellerId,
+                                                  ChargeRule.sellerId == seller_id,
                                                   ChargeRule.status == 1).one()
         balance = customer.balance + charge_rule.balanceChange
         quantity = customer.quantity + charge_rule.quantityChange
@@ -312,8 +308,29 @@ class Customer(BaseModel):
         return customer
 
     @staticmethod
-    def consume(db, admin_id, customer_id, old_update_time,
-                balance_change=0, quantity_change=0, score_change=0, comments=None):
+    def send_consume_captcha(db, seller_id, customer_id, cellphone, old_update_time):
+        """发送消费验证码
+        """
+        now = datetime.now()
+        captcha = str(random())[2:8]
+        if db.query(Customer) \
+                .filter(Customer.id == customer_id,
+                        Customer.sellerId == seller_id,
+                        Customer.cellphone == cellphone,
+                        Customer.status == 1,
+                        Customer.updateTime == datetime.fromtimestamp(old_update_time)) \
+                .with_lockmode('update') \
+                .update({'cellphoneConsumeCaptcha': captcha,
+                         'cellphoneConsumeCaptchaExpireTime': datetime.fromtimestamp(now.timestamp() + 10 * 60)}):
+            db.commit()
+            send_sms(cellphone, '消费验证码:{0}'.format(captcha))
+        else:
+            db.rollback()
+        return
+
+    @staticmethod
+    def consume(db, seller_id, customer_id, old_update_time,
+                balance_change=0, quantity_change=0, score_change=0, comments=None, captcha=None):
         """会员消费
         """
         if balance_change > 0 or quantity_change > 0 or score_change > 0:
@@ -321,11 +338,15 @@ class Customer(BaseModel):
         if balance_change == 0 and quantity_change == 0 and score_change == 0:
             raise Exception
         now = datetime.now()
-        admin = db.query(Admin).filter(Admin.id == admin_id, Admin.status == 1).one()
         customer = db.query(Customer).filter(Customer.id == customer_id,
-                                             Customer.updateTime == datetime.fromtimestamp(old_update_time),
-                                             Customer.sellerId == admin.sellerId,
-                                             Customer.status == 1).one()
+                                             Customer.sellerId == seller_id,
+                                             Customer.status == 1,
+                                             Customer.updateTime == datetime.fromtimestamp(old_update_time)).one()
+        if captcha and (not customer.cellphoneConsumeCaptcha or
+                        not customer.cellphoneConsumeCaptchaExpireTime or
+                        captcha != customer.cellphoneConsumeCaptcha or
+                        customer.cellphoneConsumeCaptchaExpireTime < now):
+            raise Exception
         balance = customer.balance + balance_change
         quantity = customer.quantity + quantity_change
         score_change += -balance_change * customer.seller.scoreRate
@@ -342,11 +363,14 @@ class Customer(BaseModel):
         # 消费
         if db.query(Customer) \
                 .filter(Customer.id == customer_id,
+                        Customer.sellerId == seller_id,
                         Customer.status == 1,
                         Customer.updateTime == datetime.fromtimestamp(old_update_time)) \
                 .with_lockmode('update') \
-                .update({'balance': balance, 'quantity': quantity, 'score': score, 'updateTime': now}):
+                .update({'balance': balance, 'quantity': quantity, 'score': score,
+                         'cellphoneConsumeCaptcha': None, 'cellphoneConsumeCaptchaExpireTime': None,
+                         'updateTime': now}):
             db.commit()
         else:
             db.rollback()
-        return customer
+        return
